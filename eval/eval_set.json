@@ -779,6 +779,617 @@
       },
       "answer_hint": "Products vs Services table.",
       "expect_table": true
+    },
+    {
+      "id": "cp01",
+      "type": "comparative",
+      "question": "Compare how Microsoft and Amazon each describe the drivers of their cloud revenue growth, and note where their explanations differ.",
+      "gold": {
+        "sections": [
+          "Item 2",
+          "Item 7"
+        ],
+        "tickers": [
+          "MSFT",
+          "AMZN"
+        ]
+      },
+      "answer_hint": "Azure consumption/AI vs AWS usage/AI."
+    },
+    {
+      "id": "cp02",
+      "type": "comparative",
+      "question": "Both NVIDIA and Alphabet discuss AI infrastructure investment \u2014 how does each frame the spending, as a cost or as a growth driver?",
+      "gold": {
+        "sections": [
+          "Item 2",
+          "Item 7",
+          "Item 1A"
+        ],
+        "tickers": [
+          "NVDA",
+          "GOOGL"
+        ]
+      },
+      "answer_hint": "NVDA sells it; GOOGL spends capex on it."
+    },
+    {
+      "id": "cp03",
+      "type": "comparative",
+      "question": "How do Apple and Alphabet each characterise their exposure to regulatory and antitrust action?",
+      "gold": {
+        "sections": [
+          "Item 1A",
+          "Item 3"
+        ],
+        "tickers": [
+          "AAPL",
+          "GOOGL"
+        ]
+      },
+      "answer_hint": "App Store vs search distribution."
+    },
+    {
+      "id": "cp04",
+      "type": "comparative",
+      "question": "Which of Microsoft or Amazon discloses greater dependence on a small number of large customers, and in what terms?",
+      "gold": {
+        "sections": [
+          "Item 1A",
+          "Item 1"
+        ],
+        "tickers": [
+          "MSFT",
+          "AMZN"
+        ]
+      },
+      "answer_hint": "Customer concentration language."
+    },
+    {
+      "id": "cp05",
+      "type": "comparative",
+      "question": "Compare the gross margin profile Apple reports for Products versus what Microsoft reports across its segments.",
+      "gold": {
+        "sections": [
+          "Item 7",
+          "Item 2",
+          "Item 8"
+        ],
+        "tickers": [
+          "AAPL",
+          "MSFT"
+        ]
+      },
+      "answer_hint": "Products/Services margin vs segment margins.",
+      "expect_table": true
+    },
+    {
+      "id": "cp06",
+      "type": "comparative",
+      "question": "How do NVIDIA and Microsoft each describe supply constraints limiting their ability to meet demand?",
+      "gold": {
+        "sections": [
+          "Item 1A",
+          "Item 2",
+          "Item 7"
+        ],
+        "tickers": [
+          "NVDA",
+          "MSFT"
+        ]
+      },
+      "answer_hint": "NVDA supply/capacity, MSFT datacenter capacity."
+    },
+    {
+      "id": "cp07",
+      "type": "comparative",
+      "question": "Compare how Amazon and Alphabet describe competition in cloud infrastructure and who they name as rivals.",
+      "gold": {
+        "sections": [
+          "Item 1",
+          "Item 1A"
+        ],
+        "tickers": [
+          "AMZN",
+          "GOOGL"
+        ]
+      },
+      "answer_hint": "Named competitors in Item 1."
+    },
+    {
+      "id": "cp08",
+      "type": "comparative",
+      "question": "Which company, Apple or NVIDIA, discloses greater geographic concentration of manufacturing, and what specifically do they say?",
+      "gold": {
+        "sections": [
+          "Item 1A",
+          "Item 1"
+        ],
+        "tickers": [
+          "AAPL",
+          "NVDA"
+        ]
+      },
+      "answer_hint": "Both outsource; Taiwan/China concentration."
+    },
+    {
+      "id": "qn01",
+      "type": "quantitative",
+      "question": "By how many percentage points did NVIDIA's gross margin change between the two most recent quarters, and what were the two values?",
+      "gold": {
+        "sections": [
+          "Item 2",
+          "Item 7"
+        ],
+        "ticker": "NVDA"
+      },
+      "answer_hint": "72.4% -> 73.4%.",
+      "expect_table": true
+    },
+    {
+      "id": "qn02",
+      "type": "quantitative",
+      "question": "What was Microsoft's total revenue in the most recent quarter, and how much of it came from Intelligent Cloud?",
+      "gold": {
+        "sections": [
+          "Item 1",
+          "Item 2",
+          "Item 7",
+          "Item 8"
+        ],
+        "ticker": "MSFT"
+      },
+      "answer_hint": "Total vs segment revenue.",
+      "expect_table": true
+    },
+    {
+      "id": "qn03",
+      "type": "quantitative",
+      "question": "What were Amazon's operating income figures for North America, International and AWS in the most recent period reported?",
+      "gold": {
+        "sections": [
+          "Item 1",
+          "Item 2",
+          "Item 7",
+          "Item 8"
+        ],
+        "ticker": "AMZN"
+      },
+      "answer_hint": "Segment operating income table.",
+      "expect_table": true
+    },
+    {
+      "id": "qn04",
+      "type": "quantitative",
+      "question": "How much did Alphabet spend on capital expenditures in the most recent period, and how does that compare with the prior year period?",
+      "gold": {
+        "sections": [
+          "Item 1",
+          "Item 2",
+          "Item 7",
+          "Item 8"
+        ],
+        "ticker": "GOOGL"
+      },
+      "answer_hint": "Cash flow / MD&A capex.",
+      "expect_table": true
+    },
+    {
+      "id": "qn05",
+      "type": "quantitative",
+      "question": "What were Apple's net sales by reportable geographic segment in the most recent period?",
+      "gold": {
+        "sections": [
+          "Item 7",
+          "Item 8",
+          "Item 1",
+          "Item 2"
+        ],
+        "ticker": "AAPL"
+      },
+      "answer_hint": "Americas/Europe/Greater China/Japan/APAC.",
+      "expect_table": true
+    },
+    {
+      "id": "qn06",
+      "type": "quantitative",
+      "question": "What proportion of NVIDIA's total revenue came from the Compute & Networking segment in the most recent quarter?",
+      "gold": {
+        "sections": [
+          "Item 1",
+          "Item 2"
+        ],
+        "ticker": "NVDA"
+      },
+      "answer_hint": "Segment / total revenue.",
+      "expect_table": true
+    },
+    {
+      "id": "qn07",
+      "type": "quantitative",
+      "question": "How much stock-based compensation did Alphabet record in the most recent period?",
+      "gold": {
+        "sections": [
+          "Item 1",
+          "Item 2",
+          "Item 7",
+          "Item 8"
+        ],
+        "ticker": "GOOGL"
+      },
+      "answer_hint": "SBC in cash flow or notes.",
+      "expect_table": true
+    },
+    {
+      "id": "qn08",
+      "type": "quantitative",
+      "question": "What were Microsoft's research and development expenses in the latest period, and how did they move year over year?",
+      "gold": {
+        "sections": [
+          "Item 1",
+          "Item 2",
+          "Item 7",
+          "Item 8"
+        ],
+        "ticker": "MSFT"
+      },
+      "answer_hint": "R&D line item.",
+      "expect_table": true
+    },
+    {
+      "id": "rl01",
+      "type": "risk_linkage",
+      "question": "NVIDIA attributes growth to the Blackwell ramp \u2014 what risks does it disclose that would specifically threaten that ramp?",
+      "gold": {
+        "sections": [
+          "Item 1A",
+          "Item 2",
+          "Item 7"
+        ],
+        "ticker": null
+      },
+      "answer_hint": "Supply, manufacturing, demand concentration."
+    },
+    {
+      "id": "rl02",
+      "type": "risk_linkage",
+      "question": "Amazon points to AWS as a growth engine; which of its disclosed risks bear most directly on AWS?",
+      "gold": {
+        "sections": [
+          "Item 1A",
+          "Item 7"
+        ],
+        "ticker": "AMZN"
+      },
+      "answer_hint": "Competition, capacity, technology change."
+    },
+    {
+      "id": "rl03",
+      "type": "risk_linkage",
+      "question": "Alphabet describes AI as central to its future \u2014 what risks does it link to AI development and deployment?",
+      "gold": {
+        "sections": [
+          "Item 1A",
+          "Item 7",
+          "Item 2"
+        ],
+        "ticker": "GOOGL"
+      },
+      "answer_hint": "AI regulatory, reputational, competitive risk."
+    },
+    {
+      "id": "rl04",
+      "type": "risk_linkage",
+      "question": "Apple's Services business is a growth driver; what regulatory risks does Apple tie to that business specifically?",
+      "gold": {
+        "sections": [
+          "Item 1A",
+          "Item 3",
+          "Item 7"
+        ],
+        "ticker": "AAPL"
+      },
+      "answer_hint": "App Store regulation, DMA."
+    },
+    {
+      "id": "rl05",
+      "type": "risk_linkage",
+      "question": "Microsoft describes AI as a growth driver while also disclosing large capital commitments \u2014 what risk does it associate with that spending?",
+      "gold": {
+        "sections": [
+          "Item 1A",
+          "Item 7",
+          "Item 2"
+        ],
+        "ticker": "MSFT"
+      },
+      "answer_hint": "Capacity buildout vs demand risk."
+    },
+    {
+      "id": "rl06",
+      "type": "risk_linkage",
+      "question": "What does NVIDIA say about customer concentration, and how does that interact with the risks it names around demand?",
+      "gold": {
+        "sections": [
+          "Item 1A",
+          "Item 1",
+          "Item 2"
+        ],
+        "ticker": "NVDA"
+      },
+      "answer_hint": "Few large customers, demand volatility."
+    },
+    {
+      "id": "ac01",
+      "type": "accounting",
+      "question": "How does Microsoft describe its revenue recognition for cloud and software subscriptions?",
+      "gold": {
+        "sections": [
+          "Item 1",
+          "Item 7",
+          "Item 8",
+          "Item 2"
+        ],
+        "ticker": "MSFT"
+      },
+      "answer_hint": "Ratable vs point-in-time."
+    },
+    {
+      "id": "ac02",
+      "type": "accounting",
+      "question": "What does Amazon disclose about unearned revenue and when it is recognised?",
+      "gold": {
+        "sections": [
+          "Item 1",
+          "Item 8",
+          "Item 2",
+          "Item 7"
+        ],
+        "ticker": "AMZN"
+      },
+      "answer_hint": "Unearned revenue note."
+    },
+    {
+      "id": "ac03",
+      "type": "accounting",
+      "question": "What useful lives does Alphabet use for its server and network equipment, and has it changed them?",
+      "gold": {
+        "sections": [
+          "Item 1",
+          "Item 7",
+          "Item 8",
+          "Item 2"
+        ],
+        "ticker": "GOOGL"
+      },
+      "answer_hint": "Depreciation life change."
+    },
+    {
+      "id": "ac04",
+      "type": "accounting",
+      "question": "How does NVIDIA account for inventory provisions and excess purchase obligations?",
+      "gold": {
+        "sections": [
+          "Item 1",
+          "Item 2",
+          "Item 7",
+          "Item 8"
+        ],
+        "ticker": "NVDA"
+      },
+      "answer_hint": "Inventory reserves, H20 charge."
+    },
+    {
+      "id": "ac05",
+      "type": "accounting",
+      "question": "What does Apple disclose about its accounting for warranty and product liability?",
+      "gold": {
+        "sections": [
+          "Item 7",
+          "Item 8",
+          "Item 1"
+        ],
+        "ticker": "AAPL"
+      },
+      "answer_hint": "Warranty accrual."
+    },
+    {
+      "id": "ca01",
+      "type": "capital_allocation",
+      "question": "What does Apple disclose about its share repurchase programme and dividends in the most recent period?",
+      "gold": {
+        "sections": [
+          "Item 5",
+          "Item 7",
+          "Item 8",
+          "Item 2"
+        ],
+        "ticker": "AAPL"
+      },
+      "answer_hint": "Buyback authorisation and dividend.",
+      "expect_table": true
+    },
+    {
+      "id": "ca02",
+      "type": "capital_allocation",
+      "question": "How much did Alphabet return to shareholders through buybacks, and what does it say about the programme?",
+      "gold": {
+        "sections": [
+          "Item 2",
+          "Item 5",
+          "Item 7",
+          "Item 8"
+        ],
+        "ticker": "GOOGL"
+      },
+      "answer_hint": "Repurchases in cash flow.",
+      "expect_table": true
+    },
+    {
+      "id": "ca03",
+      "type": "capital_allocation",
+      "question": "What does Microsoft say about its dividend policy and recent dividend increases?",
+      "gold": {
+        "sections": [
+          "Item 5",
+          "Item 7",
+          "Item 2",
+          "Item 8"
+        ],
+        "ticker": "MSFT"
+      },
+      "answer_hint": "Quarterly dividend."
+    },
+    {
+      "id": "ca04",
+      "type": "capital_allocation",
+      "question": "How is NVIDIA deploying capital between buybacks and capital expenditure?",
+      "gold": {
+        "sections": [
+          "Item 2",
+          "Item 7",
+          "Item 5",
+          "Item 8"
+        ],
+        "ticker": "NVDA"
+      },
+      "answer_hint": "Repurchases vs capex.",
+      "expect_table": true
+    },
+    {
+      "id": "ca05",
+      "type": "capital_allocation",
+      "question": "What does Amazon say about its capital investment plans and how they are funded?",
+      "gold": {
+        "sections": [
+          "Item 2",
+          "Item 7",
+          "Item 1A"
+        ],
+        "ticker": "AMZN"
+      },
+      "answer_hint": "Capex for AWS/fulfilment."
+    },
+    {
+      "id": "cc01",
+      "type": "concentration",
+      "question": "Does NVIDIA disclose that any single customer accounted for a significant share of revenue, and what share?",
+      "gold": {
+        "sections": [
+          "Item 1",
+          "Item 2",
+          "Item 1A",
+          "Item 8"
+        ],
+        "ticker": "NVDA"
+      },
+      "answer_hint": "Customer concentration disclosure.",
+      "expect_table": true
+    },
+    {
+      "id": "cc02",
+      "type": "concentration",
+      "question": "What does Apple disclose about reliance on single or limited sources of supply?",
+      "gold": {
+        "sections": [
+          "Item 1A",
+          "Item 1"
+        ],
+        "ticker": "AAPL"
+      },
+      "answer_hint": "Single-source components."
+    },
+    {
+      "id": "cc03",
+      "type": "concentration",
+      "question": "What does Microsoft disclose about concentration in its distribution or partner channel?",
+      "gold": {
+        "sections": [
+          "Item 1A",
+          "Item 1"
+        ],
+        "ticker": "MSFT"
+      },
+      "answer_hint": "Partner/channel reliance."
+    },
+    {
+      "id": "cc04",
+      "type": "concentration",
+      "question": "Does Alphabet disclose dependence on any single revenue source, and how does it characterise that risk?",
+      "gold": {
+        "sections": [
+          "Item 1A",
+          "Item 1"
+        ],
+        "ticker": "GOOGL"
+      },
+      "answer_hint": "Advertising dependence."
+    },
+    {
+      "id": "lg01",
+      "type": "legal",
+      "question": "What material legal proceedings does Alphabet describe, and what stage are they at?",
+      "gold": {
+        "sections": [
+          "Item 3",
+          "Item 1A",
+          "Item 8",
+          "Item 1"
+        ],
+        "ticker": "GOOGL"
+      },
+      "answer_hint": "Antitrust matters."
+    },
+    {
+      "id": "lg02",
+      "type": "legal",
+      "question": "What legal or regulatory proceedings does Apple describe as material?",
+      "gold": {
+        "sections": [
+          "Item 3",
+          "Item 1A",
+          "Item 8",
+          "Item 1"
+        ],
+        "ticker": "AAPL"
+      },
+      "answer_hint": "Epic, DOJ, DMA."
+    },
+    {
+      "id": "lg03",
+      "type": "legal",
+      "question": "What does Amazon disclose about ongoing regulatory investigations into its business practices?",
+      "gold": {
+        "sections": [
+          "Item 3",
+          "Item 1A",
+          "Item 8",
+          "Item 1"
+        ],
+        "ticker": "AMZN"
+      },
+      "answer_hint": "FTC and EU matters."
+    },
+    {
+      "id": "n06",
+      "type": "negative",
+      "question": "What revenue does NVIDIA forecast for the next fiscal year?",
+      "gold": null,
+      "answer_hint": "Forward guidance is not in the filings."
+    },
+    {
+      "id": "n07",
+      "type": "negative",
+      "question": "What is Microsoft's market share in cloud infrastructure compared with AWS?",
+      "gold": null,
+      "answer_hint": "Third-party market share is not disclosed."
+    },
+    {
+      "id": "n08",
+      "type": "negative",
+      "question": "How many H100 GPUs did NVIDIA ship last quarter?",
+      "gold": null,
+      "answer_hint": "Unit volumes are not disclosed."
     }
   ]
 }

@@ -7,6 +7,7 @@ raw dump — the discipline the plan locks in Phase 1 so it's habitual by Phase 
 import re
 from typing import List, Dict, Optional
 
+import config
 from retrieval import Retriever
 
 _retriever: Optional[Retriever] = None
@@ -99,6 +100,21 @@ def search_filings(query: str, ticker: str = None, section: str = None,
     # A section filter is applied by post-filtering, so a reserved table slot
     # would just be discarded — skip the quota there.
     quota = 0 if section else table_quota
+
+    # Comparative questions name two companies and need both represented.
+    # Global top-k covered both only 75% of the time (eval/run_company_coverage.py),
+    # so the model was asked to compare two companies while seeing one. Split the
+    # budget per company, exactly as temporal fan-out splits it per period.
+    if not ticker and not temporal:
+        named = config.mentioned_tickers(query)
+        if len(named) > 1:
+            per = max(2, k // len(named))
+            out = []
+            for t in named:
+                out += search_filings(query, ticker=t, section=section, period=period,
+                                      filing_type=filing_type, k=per,
+                                      period_type=period_type, table_quota=quota)
+            return out
 
     if temporal and ticker:
         groups = r.temporal_search(query, ticker, k_per_period=k,

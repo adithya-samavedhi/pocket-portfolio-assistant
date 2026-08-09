@@ -27,7 +27,10 @@ EVAL_SET = Path(__file__).resolve().parent / "eval_set.json"
 
 
 def is_hit(meta, gold) -> bool:
-    if meta.get("ticker") != gold["ticker"]:
+    # Comparative questions span companies: any of the named tickers counts,
+    # since a single chunk can only ever come from one filing.
+    tickers = gold.get("tickers") or [gold["ticker"]]
+    if meta.get("ticker") not in tickers:
         return False
     if section_code(meta.get("section", "")) not in gold["sections"]:
         return False
@@ -101,7 +104,9 @@ def main():
     print("By question type:")
     print(f"  {'type':<14} {'n':>3} " + " ".join(f'R@{k:<3}' for k in ks))
     order = ["factual", "section", "cross_quarter", "segment", "trend",
-             "moat", "headwind", "growth_driver", "multi_hop"]
+             "moat", "headwind", "growth_driver", "multi_hop", "comparative",
+             "quantitative", "risk_linkage", "accounting", "capital_allocation",
+             "concentration", "legal"]
     for t in order + [t for t in by_type if t not in order]:
         rows = by_type.get(t, [])
         if rows:

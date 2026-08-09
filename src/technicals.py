@@ -12,17 +12,15 @@ metrics block. It never does arithmetic, and it never sees a price series.
 import re
 from typing import Optional
 
+import config
 import marketdata
 from contracts import AgentAnswer, Citation, Confidence
 from llm import LLM
 
-# The covered universe, plus the names people actually type.
-TICKERS = {"GOOGL", "NVDA", "MSFT", "AAPL", "AMZN"}
-ALIASES = {
-    "GOOGLE": "GOOGL", "ALPHABET": "GOOGL", "GOOG": "GOOGL",
-    "NVIDIA": "NVDA", "MICROSOFT": "MSFT",
-    "APPLE": "AAPL", "AMAZON": "AMZN",
-}
+# The covered universe lives in config so the filings side resolves companies
+# identically; re-exported here because callers import it from this module.
+TICKERS = config.TICKERS
+ALIASES = config.TICKER_ALIASES
 
 SYSTEM = """You are the Technicals specialist in a multi-agent finance system. \
 You answer "is it expensive / how is it trending" questions about a single stock \
@@ -57,13 +55,7 @@ _FINNHUB = "https://finnhub.io/api/v1/quote?symbol={ticker}"
 
 def resolve_ticker(question: str) -> Optional[str]:
     """Pull a covered ticker out of the question, by symbol or company name."""
-    for word in re.findall(r"[A-Za-z]{2,}", question):
-        upper = word.upper()
-        if upper in TICKERS:
-            return upper
-        if upper in ALIASES:
-            return ALIASES[upper]
-    return None
+    return config.resolve_ticker(question)
 
 
 class TechnicalsAgent:

@@ -86,18 +86,26 @@ Every change is scored against a fixed eval rather than eyeballed.
 
 | | |
 |---|---|
-| Retrieval (30-question set) | recall@1 **76%**, @5 **100%**, MRR **0.861** |
+| Retrieval (101-question set, 17 categories) | recall@1 **76%**, @5 **97%**, MRR **0.853** |
+| Table coverage on numeric questions | **24/24** (was 1/11 before tables were given a reserved slot) |
 | Period coverage on cross-quarter questions | fan-out **100%** (vs 89% global top-k) |
+| Company coverage on comparative questions | fan-out **100%** (vs 75% global top-k) |
 | Routing (29 labelled questions) | **29/29** — but the router prompt was tuned against this set, so treat it as fitted, not held out |
 | Reconciliation on "both" questions | **6/7** cite a filings *and* a market source |
 | Context isolation | specialist reading grew **12.7×**; orchestrator context grew **1.04×** |
 
 ```bash
-python eval/run_eval.py              # retrieval recall@k, MRR
+python eval/run_eval.py              # retrieval recall@k, MRR, table coverage
+python eval/run_eval.py --method rerank   # dense / bm25 / hybrid / rerank
 python eval/run_temporal.py          # period coverage
+python eval/run_company_coverage.py  # company coverage on comparative questions
 python eval/run_routing.py           # routing accuracy (--reconcile for the rest)
 python eval/context_isolation.py     # orchestrator context stays bounded
 ```
+
+Dense is the default because it wins on the eval: rerank scores MRR 0.761,
+hybrid 0.731 and bm25 0.545 against dense's 0.853. Rerank is nonetheless much
+better on a couple of narrow categories, so it stays available behind a flag.
 
 ## Layout
 

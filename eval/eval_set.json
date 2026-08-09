@@ -379,6 +379,406 @@
       "question": "What were Meta Platforms' advertising revenues last quarter?",
       "gold": null,
       "unanswerable_reason": "Meta is not in the corpus; no filing covers it."
+    },
+    {
+      "id": "m01",
+      "type": "moat",
+      "question": "What does Apple describe as the competitive strengths of its products and ecosystem?",
+      "gold": {
+        "ticker": "AAPL",
+        "sections": [
+          "Item 1",
+          "Item 1A"
+        ]
+      },
+      "answer_hint": "Item 1 Business / Competition."
+    },
+    {
+      "id": "m02",
+      "type": "moat",
+      "question": "How does NVIDIA describe its full-stack platform advantage over competitors?",
+      "gold": {
+        "ticker": "NVDA",
+        "sections": [
+          "Item 1",
+          "Item 1A",
+          "Item 7"
+        ]
+      },
+      "answer_hint": "CUDA, full-stack, ecosystem in Item 1."
+    },
+    {
+      "id": "m03",
+      "type": "moat",
+      "question": "How does Microsoft describe its competitive position in cloud computing?",
+      "gold": {
+        "ticker": "MSFT",
+        "sections": [
+          "Item 1",
+          "Item 1A"
+        ]
+      },
+      "answer_hint": "Item 1 Competition."
+    },
+    {
+      "id": "m04",
+      "type": "moat",
+      "question": "What does Amazon say differentiates AWS from competing cloud providers?",
+      "gold": {
+        "ticker": "AMZN",
+        "sections": [
+          "Item 1",
+          "Item 1A",
+          "Item 7"
+        ]
+      },
+      "answer_hint": "Item 1 Business."
+    },
+    {
+      "id": "m05",
+      "type": "moat",
+      "question": "Who does Alphabet name as its main competitors and on what basis does it compete?",
+      "gold": {
+        "ticker": "GOOGL",
+        "sections": [
+          "Item 1",
+          "Item 1A"
+        ]
+      },
+      "answer_hint": "Item 1 Competition."
+    },
+    {
+      "id": "h01",
+      "type": "headwind",
+      "question": "What does NVIDIA say about export controls and restrictions on sales to China?",
+      "gold": {
+        "ticker": "NVDA",
+        "sections": [
+          "Item 1A",
+          "Item 2",
+          "Item 7"
+        ]
+      },
+      "answer_hint": "Export licensing risk, H20."
+    },
+    {
+      "id": "h02",
+      "type": "headwind",
+      "question": "What supply chain and manufacturing concentration risks does Apple disclose?",
+      "gold": {
+        "ticker": "AAPL",
+        "sections": [
+          "Item 1A"
+        ]
+      },
+      "answer_hint": "Single-source suppliers, outsourced manufacturing."
+    },
+    {
+      "id": "h03",
+      "type": "headwind",
+      "question": "What regulatory and antitrust risks does Alphabet identify?",
+      "gold": {
+        "ticker": "GOOGL",
+        "sections": [
+          "Item 1A",
+          "Item 3"
+        ]
+      },
+      "answer_hint": "Ongoing antitrust proceedings."
+    },
+    {
+      "id": "h04",
+      "type": "headwind",
+      "question": "What risks does Microsoft disclose specifically related to artificial intelligence?",
+      "gold": {
+        "ticker": "MSFT",
+        "sections": [
+          "Item 1A"
+        ]
+      },
+      "answer_hint": "AI model, IP, regulatory risks."
+    },
+    {
+      "id": "h05",
+      "type": "headwind",
+      "question": "What does Amazon identify as the principal risks to its operating margins?",
+      "gold": {
+        "ticker": "AMZN",
+        "sections": [
+          "Item 1A",
+          "Item 7"
+        ]
+      },
+      "answer_hint": "Fulfillment, competition, investment."
+    },
+    {
+      "id": "h06",
+      "type": "headwind",
+      "question": "What does NVIDIA name as the main risks to sustaining its current revenue growth?",
+      "gold": {
+        "ticker": "NVDA",
+        "sections": [
+          "Item 1A"
+        ]
+      },
+      "answer_hint": "Demand concentration, supply, competition."
+    },
+    {
+      "id": "g01",
+      "type": "growth_driver",
+      "question": "What does NVIDIA attribute its Data Center revenue growth to?",
+      "gold": {
+        "ticker": "NVDA",
+        "sections": [
+          "Item 2",
+          "Item 7"
+        ]
+      },
+      "answer_hint": "Blackwell ramp, accelerated computing, LLMs."
+    },
+    {
+      "id": "g02",
+      "type": "growth_driver",
+      "question": "What does Microsoft say is driving growth in its cloud business?",
+      "gold": {
+        "ticker": "MSFT",
+        "sections": [
+          "Item 2",
+          "Item 7"
+        ]
+      },
+      "answer_hint": "Azure consumption, AI services."
+    },
+    {
+      "id": "g03",
+      "type": "growth_driver",
+      "question": "What does Amazon give as the drivers of AWS revenue growth?",
+      "gold": {
+        "ticker": "AMZN",
+        "sections": [
+          "Item 2",
+          "Item 7"
+        ]
+      },
+      "answer_hint": "Increased customer usage, AI."
+    },
+    {
+      "id": "g04",
+      "type": "growth_driver",
+      "question": "What does Alphabet say is driving Google Cloud growth?",
+      "gold": {
+        "ticker": "GOOGL",
+        "sections": [
+          "Item 2",
+          "Item 7"
+        ]
+      },
+      "answer_hint": "Cloud consumption, AI infrastructure."
+    },
+    {
+      "id": "g05",
+      "type": "growth_driver",
+      "question": "What does Apple attribute Services revenue growth to?",
+      "gold": {
+        "ticker": "AAPL",
+        "sections": [
+          "Item 7",
+          "Item 2"
+        ]
+      },
+      "answer_hint": "Advertising, cloud, App Store."
+    },
+    {
+      "id": "g06",
+      "type": "growth_driver",
+      "question": "What capital expenditure plans does Alphabet describe to support AI, and why?",
+      "gold": {
+        "ticker": "GOOGL",
+        "sections": [
+          "Item 2",
+          "Item 7"
+        ]
+      },
+      "answer_hint": "Capex for technical infrastructure/TPUs."
+    },
+    {
+      "id": "t01",
+      "type": "trend",
+      "question": "How has NVIDIA's gross margin moved across the recent quarters, and what explains the change?",
+      "gold": {
+        "ticker": "NVDA",
+        "sections": [
+          "Item 2",
+          "Item 7"
+        ]
+      },
+      "answer_hint": "Gross margin trend + mix/inventory commentary.",
+      "expect_table": true
+    },
+    {
+      "id": "t02",
+      "type": "trend",
+      "question": "How has Microsoft's operating income trended across recent quarters?",
+      "gold": {
+        "ticker": "MSFT",
+        "sections": [
+          "Item 2",
+          "Item 7",
+          "Item 1"
+        ]
+      },
+      "answer_hint": "Operating income by period.",
+      "expect_table": true
+    },
+    {
+      "id": "t03",
+      "type": "trend",
+      "question": "How has Amazon's AWS revenue growth rate changed over recent quarters?",
+      "gold": {
+        "ticker": "AMZN",
+        "sections": [
+          "Item 2",
+          "Item 7"
+        ]
+      },
+      "answer_hint": "AWS net sales by quarter.",
+      "expect_table": true
+    },
+    {
+      "id": "t04",
+      "type": "trend",
+      "question": "How has Apple's Services revenue trended across the most recent quarters?",
+      "gold": {
+        "ticker": "AAPL",
+        "sections": [
+          "Item 2",
+          "Item 7"
+        ]
+      },
+      "answer_hint": "Services net sales per quarter.",
+      "expect_table": true
+    },
+    {
+      "id": "x01",
+      "type": "multi_hop",
+      "question": "How has NVIDIA's revenue mix shifted between its segments, and what does management attribute the shift to?",
+      "gold": {
+        "ticker": "NVDA",
+        "sections": [
+          "Item 2",
+          "Item 1",
+          "Item 7"
+        ]
+      },
+      "answer_hint": "Segment table + MD&A driver commentary.",
+      "expect_table": true
+    },
+    {
+      "id": "x02",
+      "type": "multi_hop",
+      "question": "Is Microsoft's capital spending growing faster than its cloud revenue, and what does it say the spending is for?",
+      "gold": {
+        "ticker": "MSFT",
+        "sections": [
+          "Item 2",
+          "Item 7",
+          "Item 1"
+        ]
+      },
+      "answer_hint": "Capex vs revenue growth + purpose.",
+      "expect_table": true
+    },
+    {
+      "id": "x03",
+      "type": "multi_hop",
+      "question": "Which of Alphabet's businesses is growing fastest, and what risks does the company associate with it?",
+      "gold": {
+        "ticker": "GOOGL",
+        "sections": [
+          "Item 2",
+          "Item 7",
+          "Item 1A"
+        ]
+      },
+      "answer_hint": "Cloud fastest + associated risk language."
+    },
+    {
+      "id": "sg01",
+      "type": "segment",
+      "question": "What were NVIDIA's Compute & Networking and Graphics segment revenues in each of the last three quarters?",
+      "gold": {
+        "ticker": "NVDA",
+        "sections": [
+          "Item 1",
+          "Item 2"
+        ]
+      },
+      "answer_hint": "Segment revenue table in each 10-Q.",
+      "expect_table": true
+    },
+    {
+      "id": "sg02",
+      "type": "segment",
+      "question": "How much revenue did Microsoft's Intelligent Cloud segment generate versus Productivity and Business Processes?",
+      "gold": {
+        "ticker": "MSFT",
+        "sections": [
+          "Item 1",
+          "Item 2",
+          "Item 7",
+          "Item 8"
+        ]
+      },
+      "answer_hint": "Segment results table.",
+      "expect_table": true
+    },
+    {
+      "id": "sg03",
+      "type": "segment",
+      "question": "Which Amazon segment contributes the most operating income, and how does that compare with its share of revenue?",
+      "gold": {
+        "ticker": "AMZN",
+        "sections": [
+          "Item 1",
+          "Item 2",
+          "Item 7",
+          "Item 8"
+        ]
+      },
+      "answer_hint": "AWS dominates operating income on a smaller revenue share.",
+      "expect_table": true
+    },
+    {
+      "id": "sg04",
+      "type": "segment",
+      "question": "What were Google Cloud revenues compared with Google Services revenues?",
+      "gold": {
+        "ticker": "GOOGL",
+        "sections": [
+          "Item 1",
+          "Item 2",
+          "Item 7",
+          "Item 8"
+        ]
+      },
+      "answer_hint": "Alphabet segment table.",
+      "expect_table": true
+    },
+    {
+      "id": "sg05",
+      "type": "segment",
+      "question": "How do Apple's Services net sales compare with iPhone net sales?",
+      "gold": {
+        "ticker": "AAPL",
+        "sections": [
+          "Item 7",
+          "Item 8",
+          "Item 1",
+          "Item 2"
+        ]
+      },
+      "answer_hint": "Products vs Services table.",
+      "expect_table": true
     }
   ]
 }

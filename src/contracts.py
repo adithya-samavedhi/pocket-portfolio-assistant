@@ -18,7 +18,13 @@ Confidence = Literal["low", "medium", "high"]
 
 # Soft budget for a summary handed back to the orchestrator. Sub-agents aim
 # under this; the orchestrator can assert on it to catch raw-dump regressions.
-SUMMARY_CHAR_BUDGET = 1500
+#
+# 2400 fits a ~200-word answer plus its citations. Raised from 1500 when the
+# answering prompt was asked for per-period figures rather than a one-line
+# summary — the old cap silently truncated exactly the detail we wanted. It is
+# still ~2% of a filing, so the point of the budget (summaries, never dumps)
+# holds; eval/context_isolation.py is what proves it.
+SUMMARY_CHAR_BUDGET = 2400
 
 
 class Citation(BaseModel):

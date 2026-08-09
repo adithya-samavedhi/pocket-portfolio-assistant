@@ -21,6 +21,7 @@ from collections import defaultdict
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
 from retrieval import Retriever  # noqa: E402
 from sections import section_code  # noqa: E402
+from tools import DEFAULT_TABLE_QUOTA  # noqa: E402
 
 EVAL_SET = Path(__file__).resolve().parent / "eval_set.json"
 
@@ -46,7 +47,10 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("-k", type=int, default=10, help="max k to retrieve/report")
     ap.add_argument("--method", default="dense", choices=["dense", "bm25", "hybrid", "rerank"])
+    ap.add_argument("--table-quota", type=int, default=None,
+                    help="slots reserved for table chunks (default: the production value)")
     args = ap.parse_args()
+    quota = DEFAULT_TABLE_QUOTA if args.table_quota is None else args.table_quota
     ks = sorted({1, 3, 5, 10, args.k})
 
     data = json.loads(EVAL_SET.read_text())["questions"]
@@ -60,13 +64,23 @@ def main():
     print(f"[method={args.method}] top-{max(ks)} (unfiltered), "
           f"{len(answerable)} answerable questions...\n")
 
+    table_rows = []
     for q in answerable:
-        hits = retriever.search(q["question"], k=max(ks), method=args.method)
+        hits = retriever.search(q["question"], k=max(ks), method=args.method,
+                                table_quota=quota)
         metas = [h["metadata"] for h in hits]
         rank = first_hit_rank(metas, q["gold"])
         rr_sum += (1.0 / rank) if rank else 0.0
         row = {"id": q["id"], "rank": rank}
         by_type[q["type"]].append(row)
+        # Questions whose answer is a figure: did any table actually reach the
+        # model? Section-level recall cannot see this, which is how "the filings
+        # don't disclose that" slipped through while the table sat in the corpus.
+        if q.get("expect_table"):
+            # Count across everything retrieved: the whole set is handed to the
+            # model, and tables are deliberately placed last (nearest the question).
+            got = sum(1 for m in metas if m.get("chunk_kind") == "table")
+            table_rows.append((q["id"], got))
         if rank is None or rank > 5:
             top = metas[0]
             misses.append((q["id"], q["type"], rank, q["question"][:52],
@@ -76,9 +90,19 @@ def main():
         hits = sum(1 for r in rows if r["rank"] and r["rank"] <= k)
         return hits / len(rows) if rows else 0.0
 
+    if table_rows:
+        with_tab = sum(1 for _, g in table_rows if g)
+        print(f"Table coverage (numeric questions, quota={quota}): "
+              f"{with_tab}/{len(table_rows)} got at least one table"
+              + ("" if with_tab == len(table_rows)
+                 else "  -> missing: " + ", ".join(i for i, g in table_rows if not g)))
+        print()
+
     print("By question type:")
     print(f"  {'type':<14} {'n':>3} " + " ".join(f'R@{k:<3}' for k in ks))
-    for t in ["factual", "section", "cross_quarter"]:
+    order = ["factual", "section", "cross_quarter", "segment", "trend",
+             "moat", "headwind", "growth_driver", "multi_hop"]
+    for t in order + [t for t in by_type if t not in order]:
         rows = by_type.get(t, [])
         if rows:
             print(f"  {t:<14} {len(rows):>3} " +

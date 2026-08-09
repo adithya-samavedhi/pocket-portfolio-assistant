@@ -69,10 +69,17 @@ def _where(ticker, period, filing_type, period_type=None):
     return clauses[0] if len(clauses) == 1 else {"$and": clauses}
 
 
+# Reserve this many of the k slots for table chunks. Financial figures live in
+# tables, and tables lose every slot to narrative prose when the two compete —
+# so without a quota the model is asked numeric questions and shown only commentary.
+DEFAULT_TABLE_QUOTA = 2
+
+
 def search_filings(query: str, ticker: str = None, section: str = None,
                    period: str = None, filing_type: str = None,
                    k: int = 6, temporal: bool = False,
-                   period_type: str = None) -> List[Dict]:
+                   period_type: str = None,
+                   table_quota: int = DEFAULT_TABLE_QUOTA) -> List[Dict]:
     """Retrieve filing passages.
 
     query       natural-language question or keywords
@@ -89,15 +96,20 @@ def search_filings(query: str, ticker: str = None, section: str = None,
     """
     r = _get_retriever()
 
+    # A section filter is applied by post-filtering, so a reserved table slot
+    # would just be discarded — skip the quota there.
+    quota = 0 if section else table_quota
+
     if temporal and ticker:
         groups = r.temporal_search(query, ticker, k_per_period=k,
                                    filing_type=filing_type, section=section,
-                                   period_type=period_type or "quarter")
+                                   period_type=period_type or "quarter",
+                                   table_quota=quota)
         return [_format(h) for g in groups for h in g["hits"]]
 
     where = _where(ticker, period, filing_type, period_type)
     pool = k * 6 if section else k
-    hits = r.search(query, k=pool, where=where)
+    hits = r.search(query, k=pool, where=where, table_quota=quota)
     if section:
         needle = section.lower()
         hits = [h for h in hits if needle in h["metadata"].get("section", "").lower()]

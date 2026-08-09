@@ -113,9 +113,42 @@ class Retriever:
                 scores[_id] += w / (_RRF_K + rank + 1)
         return sorted(scores, key=scores.get, reverse=True)
 
+    @staticmethod
+    def _with(where: Optional[dict], extra: dict) -> dict:
+        """AND an extra condition onto an existing where clause."""
+        if not where:
+            return extra
+        return {"$and": [where, extra]}
+
     def search(self, query: str, k: int = 5, method: str = "dense",
                where: Optional[dict] = None,
-               weights: Optional[List[float]] = None) -> List[Dict]:
+               weights: Optional[List[float]] = None,
+               table_quota: int = 0) -> List[Dict]:
+        """Retrieve k passages.
+
+        `table_quota` ADDS table chunks on top of the k passages — it does not
+        take slots from them. Without it, financial tables never surface: a
+        question says "segments" while the table says "| Compute & Networking |
+        193,479 |", so there is neither a semantic nor a lexical bridge, and
+        narrative prose wins every slot. Measured on "top revenue growing
+        segments": 0 tables in the top 8 under dense, bm25 AND hybrid — but the
+        right tables rank 4th-5th once they only compete with each other.
+
+        Additive rather than displacing, because taking prose slots measurably
+        cost recall (MRR 0.886 -> 0.875) for no reason: a sub-agent's own context
+        is allowed to be large, and only its *summary* is budgeted.
+        """
+        if table_quota > 0:
+            # Leave the normal ranking completely untouched, then top up with
+            # any tables it missed. Filtering the main k to text-only instead
+            # would demote a table that legitimately ranked first.
+            base = self.search(query, k=k, method=method, where=where, weights=weights)
+            seen = {h["id"] for h in base}
+            extra = [h for h in self.search(query, k=table_quota + len(base), method=method,
+                                            where=self._with(where, {"chunk_kind": "table"}),
+                                            weights=weights)
+                     if h["id"] not in seen][:table_quota]
+            return base + extra            # tables last: closest to the question
         if method == "dense":
             ids = self._dense_ids(query, k, where)
         elif method == "bm25":
@@ -162,7 +195,8 @@ class Retriever:
     def temporal_search(self, query: str, ticker: str, k_per_period: int = 2,
                         filing_type: Optional[str] = None,
                         section: Optional[str] = None,
-                        period_type: Optional[str] = "quarter") -> List[Dict]:
+                        period_type: Optional[str] = "quarter",
+                        table_quota: int = 0) -> List[Dict]:
         """Fan out: retrieve top-k *within each period* so no quarter is crowded
         out. Returns period groups ordered chronologically. This is what makes
         "how has X changed over N quarters" answerable — every period is present.
@@ -175,13 +209,21 @@ class Retriever:
         groups = []
         for period, report_date in self.periods_for(ticker, filing_type, period_type):
             where = {"$and": [{"ticker": ticker}, {"fiscal_period": period}]}
-            hits = []
-            for _id in self._dense_ids(query, pool, where):
+            # Reserve table slots per period, so a quarter contributes its
+            # figures and not only its commentary.
+            n_tab, hits = table_quota, []
+            if n_tab:
+                hits = self.search(query, k=n_tab, where=self._with(where, {"chunk_kind": "table"}))
+            seen = {h["id"] for h in hits}
+            for _id in self._dense_ids(query, pool + n_tab, where):
+                if _id in seen:
+                    continue
                 doc, meta = self._by_id[_id]
                 if needle and needle not in meta.get("section", "").lower():
                     continue
-                hits.append({"id": _id, "document": doc, "metadata": meta})
-                if len(hits) >= k_per_period:
+                hits.insert(len(hits) - n_tab if n_tab else len(hits),
+                            {"id": _id, "document": doc, "metadata": meta})
+                if len(hits) >= k_per_period + n_tab:
                     break
             groups.append({"period": period, "report_date": report_date, "hits": hits})
         return groups

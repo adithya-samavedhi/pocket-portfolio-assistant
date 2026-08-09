@@ -1,3 +1,11 @@
+# Project data: raw filings, cached API responses, local vector store.
+# Raw filings are re-fetchable from EDGAR via the manifest; don't commit them.
+data/raw/
+data/cache/
+data/chroma/
+# Per-run agent traces; regenerated on every run.
+data/traces/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[codz]
@@ -216,3 +224,7 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Internal planning docs — kept locally, not published with the public site.
+docs/FINANCE-AGENT-PROJECT-PLAN.md
+docs/PHASE2-DESIGN-DECISIONS.md

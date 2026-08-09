@@ -1,0 +1,452 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pocket Portfolio Assistant — how it works</title>
+<meta name="description" content="A research assistant that answers questions about five companies from their SEC filings and market data, and cites every claim.">
+<style>
+  :root {
+    --paper:      #f6f7f5;
+    --panel:      #ffffff;
+    --ink:        #15181c;
+    --muted:      #5b6570;
+    --rule:       #dde1de;
+    --rule-soft:  #ebeeeb;
+    --filings:    #2f6f4e;
+    --filings-bg: #e9f2ec;
+    --market:     #8a5320;
+    --market-bg:  #f7efe5;
+    --warn:       #8a3324;
+
+    --display: ui-serif, Georgia, "Iowan Old Style", "Palatino Linotype", serif;
+    --body: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+
+    --measure: 68ch;
+    --wide: 62rem;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --paper:      #131519;
+      --panel:      #1a1d21;
+      --ink:        #e9ebe8;
+      --muted:      #99a0a8;
+      --rule:       #2b2f34;
+      --rule-soft:  #23262a;
+      --filings:    #7fbf9a;
+      --filings-bg: #1f2e27;
+      --market:     #d8a26a;
+      --market-bg:  #2e2418;
+      --warn:       #e08a76;
+    }
+  }
+  :root[data-theme="dark"] {
+    --paper:#131519; --panel:#1a1d21; --ink:#e9ebe8; --muted:#99a0a8;
+    --rule:#2b2f34; --rule-soft:#23262a;
+    --filings:#7fbf9a; --filings-bg:#1f2e27;
+    --market:#d8a26a; --market-bg:#2e2418; --warn:#e08a76;
+  }
+  :root[data-theme="light"] {
+    --paper:#f6f7f5; --panel:#ffffff; --ink:#15181c; --muted:#5b6570;
+    --rule:#dde1de; --rule-soft:#ebeeeb;
+    --filings:#2f6f4e; --filings-bg:#e9f2ec;
+    --market:#8a5320; --market-bg:#f7efe5; --warn:#8a3324;
+  }
+
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0; background: var(--paper); color: var(--ink);
+    font-family: var(--body); font-size: 17px; line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: var(--wide); margin: 0 auto; padding: 0 1.5rem; }
+  .col { max-width: var(--measure); }
+
+  h1, h2, h3 { font-family: var(--display); font-weight: 600; text-wrap: balance; }
+  h1 { font-size: clamp(2rem, 5vw, 2.9rem); line-height: 1.12; letter-spacing: -0.018em; margin: 0 0 .6rem; }
+  h2 { font-size: clamp(1.35rem, 3vw, 1.7rem); letter-spacing: -0.01em; margin: 0 0 .4rem; }
+  h3 { font-size: 1.05rem; margin: 0 0 .3rem; }
+  p { margin: 0 0 1rem; }
+  a { color: inherit; text-underline-offset: 3px; text-decoration-color: var(--rule); }
+  a:hover { text-decoration-color: currentColor; }
+  :focus-visible { outline: 2px solid var(--filings); outline-offset: 3px; border-radius: 3px; }
+
+  .eyebrow {
+    font-family: var(--mono); font-size: .72rem; letter-spacing: .14em;
+    text-transform: uppercase; color: var(--muted); margin: 0 0 1rem;
+  }
+  .standfirst { font-size: 1.16rem; color: var(--muted); max-width: 54ch; }
+
+  header.masthead { padding: clamp(3rem, 8vw, 5.5rem) 0 2.5rem; }
+  .chips { display: flex; flex-wrap: wrap; gap: .4rem; margin-top: 1.8rem; align-items: baseline; }
+  .chips .lead { font-family: var(--mono); font-size: .72rem; letter-spacing: .1em;
+                 text-transform: uppercase; color: var(--muted); margin-right: .3rem; }
+  .chip {
+    font-family: var(--mono); font-size: .78rem; padding: .18rem .55rem;
+    border: 1px solid var(--rule); border-radius: 2px; color: var(--muted); background: var(--panel);
+  }
+
+  section { padding: 2.75rem 0; border-top: 1px solid var(--rule-soft); }
+  .lede { color: var(--muted); margin-bottom: 2rem; }
+
+  /* ---- the pipeline: numbered nodes hung off a vertical rail ---- */
+  .rail { position: relative; margin-top: 2rem; }
+  .rail::before {
+    content: ""; position: absolute; left: 15px; top: .6rem; bottom: .6rem;
+    width: 1px; background: var(--rule);
+  }
+  .node { position: relative; padding-left: 3.25rem; padding-bottom: 2.1rem; }
+  .node:last-child { padding-bottom: 0; }
+  .node > .num {
+    position: absolute; left: 0; top: 0; width: 31px; height: 31px; border-radius: 50%;
+    display: grid; place-items: center; background: var(--panel);
+    border: 1px solid var(--rule); font-family: var(--mono); font-size: .8rem; color: var(--muted);
+  }
+  .node h3 { margin-bottom: .15rem; }
+  .node p { margin: 0; color: var(--muted); max-width: 58ch; }
+  .aside {
+    font-family: var(--mono); font-size: .78rem; color: var(--muted);
+    margin-top: .5rem; padding-left: .75rem; border-left: 2px solid var(--rule);
+  }
+
+  /* the two specialists run at the same time — show them as parallel lanes */
+  .lanes { display: grid; grid-template-columns: 1fr 1fr; gap: .9rem; margin-top: .9rem; }
+  @media (max-width: 620px) { .lanes { grid-template-columns: 1fr; } }
+  .lane { border: 1px solid var(--rule); border-radius: 4px; padding: .85rem 1rem; background: var(--panel); }
+  .lane.filings { border-left: 3px solid var(--filings); }
+  .lane.market  { border-left: 3px solid var(--market); }
+  .lane .name {
+    font-family: var(--mono); font-size: .74rem; letter-spacing: .09em; text-transform: uppercase;
+    margin-bottom: .3rem;
+  }
+  .lane.filings .name { color: var(--filings); }
+  .lane.market  .name { color: var(--market); }
+  .lane p { font-size: .92rem; margin: 0; }
+
+  /* ---- specialist detail cards ---- */
+  .cards { display: grid; grid-template-columns: 1fr 1fr; gap: 1.1rem; margin-top: 1.6rem; }
+  @media (max-width: 720px) { .cards { grid-template-columns: 1fr; } }
+  .card { border: 1px solid var(--rule); border-radius: 5px; padding: 1.3rem 1.4rem; background: var(--panel); }
+  .card > .name {
+    font-family: var(--mono); font-size: .74rem; letter-spacing: .09em;
+    text-transform: uppercase; margin-bottom: .5rem;
+  }
+  .card.filings > .name { color: var(--filings); }
+  .card.market  > .name { color: var(--market); }
+  .card ul { margin: .7rem 0 0; padding-left: 1.1rem; font-size: .93rem; color: var(--muted); }
+  .card li { margin-bottom: .3rem; }
+  .card .src {
+    margin-top: .9rem; padding-top: .7rem; border-top: 1px solid var(--rule-soft);
+    font-family: var(--mono); font-size: .75rem; color: var(--muted);
+  }
+
+  /* ---- worked example ---- */
+  .example { border: 1px solid var(--rule); border-radius: 5px; background: var(--panel); overflow: hidden; }
+  .example .q {
+    padding: 1rem 1.3rem; border-bottom: 1px solid var(--rule-soft);
+    font-family: var(--display); font-size: 1.1rem;
+  }
+  .example .q::before { content: "Q  "; font-family: var(--mono); color: var(--muted); font-size: .85rem; }
+  .example .body { padding: 1.2rem 1.3rem; }
+  .routed { display: flex; flex-wrap: wrap; gap: .35rem; margin-bottom: 1rem; align-items: center; }
+  .tag { font-family: var(--mono); font-size: .74rem; padding: .16rem .5rem; border-radius: 2px; }
+  .tag.filings { background: var(--filings-bg); color: var(--filings); }
+  .tag.market  { background: var(--market-bg);  color: var(--market); }
+  .tag.plain   { background: var(--rule-soft);  color: var(--muted); }
+  .answer { margin: 0; }
+  .answer sup { font-family: var(--mono); font-size: .7em; color: var(--muted); padding-left: .1em; }
+  .sources { margin: 1.1rem 0 0; padding: .9rem 0 0; border-top: 1px solid var(--rule-soft); list-style: none; }
+  .sources li { font-family: var(--mono); font-size: .78rem; color: var(--muted); margin-bottom: .35rem; }
+  .sources .k {
+    display: inline-block; min-width: 4.6rem; font-size: .68rem; text-transform: uppercase;
+    letter-spacing: .06em;
+  }
+  .sources .filings .k { color: var(--filings); }
+  .sources .market  .k { color: var(--market); }
+
+  /* ---- guardrails ---- */
+  .rules { list-style: none; padding: 0; margin: 1.5rem 0 0; display: grid; gap: 1.1rem; }
+  .rules li { padding-left: 1.1rem; border-left: 2px solid var(--rule); max-width: 62ch; }
+  .rules strong { font-weight: 600; }
+  .rules span { display: block; color: var(--muted); font-size: .95rem; }
+  .quote {
+    font-family: var(--mono); font-size: .8rem; color: var(--muted);
+    margin-top: .4rem; display: block;
+  }
+
+  /* ---- how to use ---- */
+  pre {
+    margin: .8rem 0 0; padding: .9rem 1.1rem; background: var(--panel);
+    border: 1px solid var(--rule); border-radius: 4px; overflow-x: auto;
+    font-family: var(--mono); font-size: .82rem; line-height: 1.7;
+  }
+  pre .c { color: var(--muted); }
+  .asks { display: grid; gap: .6rem; margin-top: 1.4rem; }
+  .ask {
+    display: grid; grid-template-columns: 8.5rem 1fr; gap: 1rem; align-items: baseline;
+    padding-bottom: .6rem; border-bottom: 1px solid var(--rule-soft);
+  }
+  @media (max-width: 620px) { .ask { grid-template-columns: 1fr; gap: .15rem; } }
+  .ask .who { font-family: var(--mono); font-size: .73rem; text-transform: uppercase; letter-spacing: .07em; }
+  .ask .who.f { color: var(--filings); }
+  .ask .who.m { color: var(--market); }
+  .ask .who.b { color: var(--ink); }
+  .ask .who.n { color: var(--muted); }
+  .ask .txt { font-size: .97rem; }
+
+  footer { padding: 2.5rem 0 4rem; border-top: 1px solid var(--rule-soft); color: var(--muted); font-size: .88rem; }
+  footer .meta { display: flex; flex-wrap: wrap; gap: 1.5rem; margin-top: .8rem; font-family: var(--mono); font-size: .76rem; }
+  .tnum { font-variant-numeric: tabular-nums; }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <header class="masthead">
+    <p class="eyebrow">Research assistant</p>
+    <h1>Ask about a company. Get an answer that cites its sources.</h1>
+    <p class="standfirst col">
+      It reads SEC filings and live market data, decides which of those a question
+      actually needs, and reconciles them into one answer — with a link to every
+      figure it used.
+    </p>
+    <div class="chips">
+      <span class="lead">Covers</span>
+      <span class="chip">AAPL</span>
+      <span class="chip">AMZN</span>
+      <span class="chip">GOOGL</span>
+      <span class="chip">MSFT</span>
+      <span class="chip">NVDA</span>
+    </div>
+  </header>
+
+  <section>
+    <div class="col">
+      <h2>What happens when you ask</h2>
+      <p class="lede">
+        Four steps, about five seconds. The order matters: nothing is retrieved
+        until the question has been understood, and nothing is answered until the
+        evidence is in.
+      </p>
+    </div>
+
+    <div class="rail">
+      <div class="node">
+        <span class="num">1</span>
+        <h3>Your question is read, not matched</h3>
+        <p>
+          It works out which sources could actually answer you, and rewrites your
+          question for each one. Filings can't tell you whether a stock is
+          expensive; they can tell you what revenue and margins did.
+        </p>
+        <p class="aside">"Is NVDA expensive?" → filings are asked about growth and margins, market data about the multiple</p>
+      </div>
+
+      <div class="node">
+        <span class="num">2</span>
+        <h3>The right specialists work — at the same time</h3>
+        <p>
+          One, both, or neither. They run in parallel, so consulting two costs
+          barely more time than consulting one.
+        </p>
+        <div class="lanes">
+          <div class="lane filings">
+            <p class="name">Filings</p>
+            <p>Searches the 10-K and 10-Q text for passages that bear on the question.</p>
+          </div>
+          <div class="lane market">
+            <p class="name">Market</p>
+            <p>Pulls the quote, the multiples, and the trend measures for the ticker.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="node">
+        <span class="num">3</span>
+        <h3>Each returns a summary, never a document dump</h3>
+        <p>
+          A specialist may read fifty pages; it hands back a short finding plus the
+          sources behind it. That keeps the final step reading evidence rather than
+          drowning in it.
+        </p>
+      </div>
+
+      <div class="node">
+        <span class="num">4</span>
+        <h3>The findings are reconciled, not stapled together</h3>
+        <p>
+          Where the filings and the market point different ways, the answer says so
+          explicitly instead of presenting a contradiction as agreement. Every
+          figure keeps the citation it came from.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="col">
+      <h2>The two specialists</h2>
+      <p class="lede">
+        They are deliberately separate, because they are good at different questions
+        and wrong in different ways.
+      </p>
+    </div>
+
+    <div class="cards">
+      <div class="card filings">
+        <p class="name">Filings</p>
+        <h3>What the company reported</h3>
+        <ul>
+          <li>Revenue, segments, margins</li>
+          <li>Named risk factors</li>
+          <li>Management's own commentary</li>
+          <li>How any of it changed across quarters</li>
+        </ul>
+        <p class="src">SEC 10-K and 10-Q · quarters labelled the company's way (NVDA's July quarter is Q2&nbsp;FY2026, not Q3&nbsp;2025)</p>
+      </div>
+      <div class="card market">
+        <p class="name">Market</p>
+        <h3>What the stock has done</h3>
+        <ul>
+          <li>Price, market cap, P/E and P/S</li>
+          <li>Momentum from one month to one year</li>
+          <li>Position in the 52-week range</li>
+          <li>Drawdown and volatility</li>
+        </ul>
+        <p class="src">Every number computed from the full price series before it reaches the model — the model interprets, it never does the arithmetic</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="col">
+      <h2>A real answer</h2>
+      <p class="lede">
+        A question that needs both sources, and what comes back.
+      </p>
+    </div>
+
+    <div class="example">
+      <p class="q">Is NVDA expensive right now?</p>
+      <div class="body">
+        <div class="routed">
+          <span class="tag plain">consulted</span>
+          <span class="tag filings">filings</span>
+          <span class="tag market">market</span>
+        </div>
+        <p class="answer">
+          Market data shows NVDA trading at <span class="tnum">$223.96</span>, near its 52-week
+          high of <span class="tnum">$235.47</span><sup>[1][3]</sup>. Multiples are elevated — a
+          price-to-sales ratio of <span class="tnum">21.4</span> and a trailing P/E of
+          <span class="tnum">33.58</span><sup>[2]</sup> — though the forward P/E compresses to
+          <span class="tnum">17.37</span><sup>[2]</sup>, a tension between today's valuation and
+          expected earnings growth. The filings show growth that supports those multiples: revenue
+          and net income each rose <span class="tnum">65%</span>, to
+          <span class="tnum">$215.9bn</span> and <span class="tnum">$120.1bn</span>, at a
+          <span class="tnum">71.1%</span> gross margin<sup>[4]</sup>. No historical P/E series was
+          available, so this is not a comparison against NVDA's own valuation history<sup>[1]</sup>.
+        </p>
+        <ul class="sources">
+          <li class="market"><span class="k">market</span> trend measures, as of 2026-08-07</li>
+          <li class="market"><span class="k">market</span> valuation snapshot, as of 2026-08-08</li>
+          <li class="market"><span class="k">market</span> quote, as of 2026-08-08</li>
+          <li class="filings"><span class="k">filing</span> NVDA 10-K FY2026 — Item 7, MD&amp;A</li>
+        </ul>
+      </div>
+    </div>
+    <p class="aside" style="margin-top:1rem; max-width:62ch;">
+      Note the last sentence. It was asked whether the stock is expensive <em>versus its own
+      history</em>, and it says plainly that it cannot answer that part.
+    </p>
+  </section>
+
+  <section>
+    <div class="col">
+      <h2>What it will refuse to do</h2>
+      <p class="lede">
+        The useful part of a research tool is knowing where it stops.
+      </p>
+      <ul class="rules">
+        <li>
+          <strong>It won't answer about a company it doesn't hold.</strong>
+          <span>Ask about Tesla or Meta and it declines rather than reaching for
+          the nearest company it does have.</span>
+          <span class="quote">"No specialist covers this question. I can answer for AAPL, AMZN, GOOGL, MSFT and NVDA."</span>
+        </li>
+        <li>
+          <strong>It won't advise or predict.</strong>
+          <span>"Should I buy?" and "will it go up next week?" have no source
+          behind them, so they get declined instead of dressed up.</span>
+        </li>
+        <li>
+          <strong>It says when the evidence isn't there.</strong>
+          <span>If the passages it found don't answer the question, it reports
+          that — with no citations and low confidence — rather than filling the
+          gap.</span>
+        </li>
+        <li>
+          <strong>It won't invent a comparison it can't make.</strong>
+          <span>Historical valuation multiples aren't in its sources, so it names
+          that limitation instead of implying a trend from today's number.</span>
+        </li>
+      </ul>
+    </div>
+  </section>
+
+  <section>
+    <div class="col">
+      <h2>Using it</h2>
+      <p class="lede">
+        A browser window, or the command line if you prefer.
+      </p>
+
+      <h3>In the browser</h3>
+      <pre><span class="c"># start it, then open http://127.0.0.1:8000</span>
+./venv/bin/python src/web.py</pre>
+      <p style="margin-top:.9rem; color:var(--muted); font-size:.95rem;">
+        You'll see which specialists were chosen and why, watch each one report
+        as it finishes, then get the reconciled answer with its sources.
+      </p>
+
+      <h3 style="margin-top:1.8rem;">From the terminal</h3>
+      <pre>./venv/bin/python src/orchestrator.py "Is NVDA expensive right now?"
+
+<span class="c"># add -v to watch the routing and timings</span>
+./venv/bin/python src/orchestrator.py "How has Microsoft's margin changed?" -v</pre>
+
+      <h3 style="margin-top:2rem;">Questions that suit it</h3>
+      <div class="asks">
+        <div class="ask"><span class="who f">filings</span><span class="txt">What supply chain risks does Apple name?</span></div>
+        <div class="ask"><span class="who f">filings</span><span class="txt">How has Microsoft's gross margin changed over recent quarters?</span></div>
+        <div class="ask"><span class="who m">market</span><span class="txt">How far is AAPL below its 52-week high?</span></div>
+        <div class="ask"><span class="who m">market</span><span class="txt">Has AMZN been trending up or down over six months?</span></div>
+        <div class="ask"><span class="who b">both</span><span class="txt">Is NVDA's P/E reasonable given its margins and growth?</span></div>
+        <div class="ask"><span class="who b">both</span><span class="txt">Google is down from its highs — did anything change in the business?</span></div>
+        <div class="ask"><span class="who n">declined</span><span class="txt">Should I buy NVDA? · What will the Fed do next month?</span></div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="col">
+      <p>
+        Filings come from SEC EDGAR and are stored locally, so the same question
+        returns the same passages tomorrow. Market data is fetched live and cached
+        briefly. Answers are grounded in those two sources and nothing else — this
+        is a research tool, not financial advice.
+      </p>
+      <div class="meta">
+        <span>SEC EDGAR · 10-K, 10-Q</span>
+        <span>Market quotes &amp; price history</span>
+        <span>5 companies</span>
+      </div>
+    </div>
+  </footer>
+
+</div>
+
+</body>
+</html>

@@ -1,0 +1,43 @@
+{
+  "_about": "Milestone 5 routing eval. Each question is labeled with the sub-agents that SHOULD be consulted. Written against what each source can answer, not against the router's prompt — deliberately including questions whose wording points one way and whose substance points another (the 'good demo questions, bad real questions' failure mode).",
+  "_labels": {
+    "fundamentals": "answerable only from SEC filings",
+    "technicals": "answerable only from market data",
+    "both": "needs the reported business AND the market price/valuation",
+    "neither": "outside coverage: macro, general knowledge, advice, or an uncovered company"
+  },
+  "questions": [
+    {"q": "What were NVIDIA's Data Center segment revenues last quarter?", "agents": ["fundamentals"], "note": "segment detail lives only in filings"},
+    {"q": "What supply chain risks does Apple name in its risk factors?", "agents": ["fundamentals"]},
+    {"q": "How has Microsoft's gross margin changed over the last four quarters?", "agents": ["fundamentals"], "temporal": true},
+    {"q": "What does Amazon say about AWS growth drivers in its MD&A?", "agents": ["fundamentals"]},
+    {"q": "How has Alphabet's language about AI competition changed across quarters?", "agents": ["fundamentals"], "temporal": true},
+    {"q": "What are the main risk factors Nvidia discloses?", "agents": ["fundamentals"]},
+    {"q": "Did Microsoft report any legal proceedings worth noting?", "agents": ["fundamentals"]},
+    {"q": "What was Apple's revenue in the most recent quarter?", "agents": ["fundamentals"]},
+
+    {"q": "What is NVDA trading at right now?", "agents": ["technicals"]},
+    {"q": "How far is AAPL below its 52-week high?", "agents": ["technicals"]},
+    {"q": "What is Microsoft's market cap?", "agents": ["technicals"]},
+    {"q": "Has AMZN been trending up or down over the last six months?", "agents": ["technicals"]},
+    {"q": "Is GOOGL above its 200-day moving average?", "agents": ["technicals"]},
+    {"q": "How volatile has NVDA been over the past year?", "agents": ["technicals"]},
+    {"q": "What was the worst drawdown Apple has had in the last year?", "agents": ["technicals"]},
+    {"q": "What is Amazon's trailing P/E?", "agents": ["technicals"], "note": "a multiple is market data; filings give earnings, not the ratio"},
+
+    {"q": "Is NVDA expensive right now?", "agents": ["fundamentals", "technicals"], "note": "the multiple is market data; whether growth justifies it is in the filings"},
+    {"q": "Is Apple's valuation justified by its business performance?", "agents": ["fundamentals", "technicals"]},
+    {"q": "Microsoft is near its highs — do the fundamentals support that?", "agents": ["fundamentals", "technicals"]},
+    {"q": "Has Amazon's stock performance kept pace with its revenue growth?", "agents": ["fundamentals", "technicals"]},
+    {"q": "Google is down from its highs. Did anything change in the business?", "agents": ["fundamentals", "technicals"]},
+    {"q": "Is NVDA's P/E reasonable given its margins and growth?", "agents": ["fundamentals", "technicals"]},
+    {"q": "Compare Apple's price momentum with what it reported last quarter.", "agents": ["fundamentals", "technicals"]},
+
+    {"q": "Should I buy NVDA?", "agents": [], "note": "personal advice — out of scope by design"},
+    {"q": "What is Tesla's revenue?", "agents": [], "note": "TSLA is outside the 5-company coverage"},
+    {"q": "What will the Fed do with interest rates next month?", "agents": [], "note": "macro, no source"},
+    {"q": "Who is the CEO of Coca-Cola?", "agents": [], "note": "general knowledge, uncovered company"},
+    {"q": "What is a good P/E ratio in general?", "agents": [], "note": "no company; general finance knowledge"},
+    {"q": "Will NVDA go up next week?", "agents": [], "note": "prediction — no source can answer it"}
+  ]
+}

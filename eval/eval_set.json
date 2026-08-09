@@ -1,0 +1,384 @@
+{
+  "_readme": "Milestone 3 eval set. 'gold.sections' lists the SEC item(s) that legitimately contain the answer (matched on the item code before the colon, e.g. 'Item 7'). Retrieval scores a hit@k if any top-k chunk matches gold ticker + one gold section (+ period when specified). Negatives have gold=null and are reported separately. Gold sections are labeled from 10-K/10-Q structure, NOT from what the system returns, to avoid the 'eval written to match the system' failure mode.",
+  "questions": [
+    {
+      "id": "f01",
+      "type": "factual",
+      "question": "What were Apple's total net sales in fiscal 2025?",
+      "gold": {
+        "ticker": "AAPL",
+        "filing_type": "10-K",
+        "period": "FY2025",
+        "sections": [
+          "Item 7",
+          "Item 8"
+        ]
+      },
+      "answer_hint": "Total net sales $416,161M (FY2025 income statement / MD&A)."
+    },
+    {
+      "id": "f02",
+      "type": "factual",
+      "question": "How much did iPhone net sales total in Apple's fiscal 2025?",
+      "gold": {
+        "ticker": "AAPL",
+        "filing_type": "10-K",
+        "period": "FY2025",
+        "sections": [
+          "Item 7"
+        ]
+      },
+      "answer_hint": "iPhone $209,586M, in the MD&A products table."
+    },
+    {
+      "id": "f03",
+      "type": "factual",
+      "question": "What were Google Cloud revenues in the second quarter of 2026?",
+      "gold": {
+        "ticker": "GOOGL",
+        "filing_type": "10-Q",
+        "period": "Q2 FY2026",
+        "sections": [
+          "Item 2",
+          "Item 1"
+        ]
+      },
+      "answer_hint": "Google Cloud revenue in Q2 2026 MD&A."
+    },
+    {
+      "id": "f04",
+      "type": "factual",
+      "question": "What were Alphabet's total consolidated revenues in the quarter ended June 30, 2026?",
+      "gold": {
+        "ticker": "GOOGL",
+        "filing_type": "10-Q",
+        "period": "Q2 FY2026",
+        "sections": [
+          "Item 2",
+          "Item 1"
+        ]
+      },
+      "answer_hint": "$119.8B, +24% YoY, MD&A."
+    },
+    {
+      "id": "f05",
+      "type": "factual",
+      "question": "How much revenue did NVIDIA's Data Center segment generate in fiscal 2026?",
+      "gold": {
+        "ticker": "NVDA",
+        "filing_type": "10-K",
+        "period": "FY2026",
+        "sections": [
+          "Item 7",
+          "Item 8"
+        ]
+      },
+      "answer_hint": "Data Center revenue in MD&A / segment note."
+    },
+    {
+      "id": "f06",
+      "type": "factual",
+      "question": "What was Microsoft's Intelligent Cloud segment revenue in fiscal 2026?",
+      "gold": {
+        "ticker": "MSFT",
+        "filing_type": "10-K",
+        "period": "FY2026",
+        "sections": [
+          "Item 7",
+          "Item 8"
+        ]
+      },
+      "answer_hint": "Intelligent Cloud revenue in MD&A / segment note."
+    },
+    {
+      "id": "f07",
+      "type": "factual",
+      "question": "What were Amazon's total net sales for the most recent fiscal year?",
+      "gold": {
+        "ticker": "AMZN",
+        "filing_type": "10-K",
+        "period": "FY2025",
+        "sections": [
+          "Item 7",
+          "Item 8"
+        ]
+      },
+      "answer_hint": "Consolidated net sales, MD&A / income statement."
+    },
+    {
+      "id": "f08",
+      "type": "factual",
+      "question": "What were AWS net sales in Amazon's latest annual report?",
+      "gold": {
+        "ticker": "AMZN",
+        "filing_type": "10-K",
+        "period": "FY2025",
+        "sections": [
+          "Item 7",
+          "Item 8"
+        ]
+      },
+      "answer_hint": "AWS segment net sales, MD&A / segment note."
+    },
+    {
+      "id": "f09",
+      "type": "factual",
+      "question": "What was Microsoft's total revenue in fiscal 2026?",
+      "gold": {
+        "ticker": "MSFT",
+        "filing_type": "10-K",
+        "period": "FY2026",
+        "sections": [
+          "Item 7",
+          "Item 8"
+        ]
+      },
+      "answer_hint": "Total revenue in MD&A / income statement."
+    },
+    {
+      "id": "f10",
+      "type": "factual",
+      "question": "What was NVIDIA's total revenue in fiscal 2026?",
+      "gold": {
+        "ticker": "NVDA",
+        "filing_type": "10-K",
+        "period": "FY2026",
+        "sections": [
+          "Item 7",
+          "Item 8"
+        ]
+      },
+      "answer_hint": "Total revenue in MD&A / income statement."
+    },
+    {
+      "id": "s01",
+      "type": "section",
+      "question": "What antitrust and competition-regulator risks does Alphabet describe?",
+      "gold": {
+        "ticker": "GOOGL",
+        "filing_type": "10-K",
+        "sections": [
+          "Item 1A"
+        ]
+      },
+      "answer_hint": "DOJ / competition authorities, Item 1A."
+    },
+    {
+      "id": "s02",
+      "type": "section",
+      "question": "How do U.S. export controls on sales to China threaten NVIDIA's business?",
+      "gold": {
+        "ticker": "NVDA",
+        "filing_type": "10-K",
+        "sections": [
+          "Item 1A"
+        ]
+      },
+      "answer_hint": "Export-control risk, Item 1A."
+    },
+    {
+      "id": "s03",
+      "type": "section",
+      "question": "What risks does Apple face from its concentration of manufacturing and outsourcing partners?",
+      "gold": {
+        "ticker": "AAPL",
+        "filing_type": "10-K",
+        "sections": [
+          "Item 1A"
+        ]
+      },
+      "answer_hint": "Manufacturing concentration, Item 1A."
+    },
+    {
+      "id": "s04",
+      "type": "section",
+      "question": "How does Microsoft govern and manage cybersecurity threats?",
+      "gold": {
+        "ticker": "MSFT",
+        "filing_type": "10-K",
+        "sections": [
+          "Item 1C"
+        ]
+      },
+      "answer_hint": "Cybersecurity governance, Item 1C."
+    },
+    {
+      "id": "s05",
+      "type": "section",
+      "question": "What risks does Amazon cite related to its international operations and foreign exchange?",
+      "gold": {
+        "ticker": "AMZN",
+        "filing_type": "10-K",
+        "sections": [
+          "Item 1A"
+        ]
+      },
+      "answer_hint": "International/FX risk, Item 1A."
+    },
+    {
+      "id": "s06",
+      "type": "section",
+      "question": "What does Alphabet's business overview say about its Other Bets?",
+      "gold": {
+        "ticker": "GOOGL",
+        "filing_type": "10-K",
+        "sections": [
+          "Item 1"
+        ]
+      },
+      "answer_hint": "Other Bets described in Business, Item 1."
+    },
+    {
+      "id": "s07",
+      "type": "section",
+      "question": "How does Apple describe the competition it faces across its markets?",
+      "gold": {
+        "ticker": "AAPL",
+        "filing_type": "10-K",
+        "sections": [
+          "Item 1"
+        ]
+      },
+      "answer_hint": "Competition in Business, Item 1."
+    },
+    {
+      "id": "s08",
+      "type": "section",
+      "question": "What does NVIDIA disclose about its employees and human capital?",
+      "gold": {
+        "ticker": "NVDA",
+        "filing_type": "10-K",
+        "sections": [
+          "Item 1"
+        ]
+      },
+      "answer_hint": "Human capital in Business, Item 1."
+    },
+    {
+      "id": "s09",
+      "type": "section",
+      "question": "What properties and facilities does Amazon operate?",
+      "gold": {
+        "ticker": "AMZN",
+        "filing_type": "10-K",
+        "sections": [
+          "Item 2"
+        ]
+      },
+      "answer_hint": "Fulfillment / data center facilities, Properties, Item 2."
+    },
+    {
+      "id": "c01",
+      "type": "cross_quarter",
+      "question": "How have Google Cloud revenues changed across the recent quarters?",
+      "gold": {
+        "ticker": "GOOGL",
+        "filing_type": "10-Q",
+        "sections": [
+          "Item 2"
+        ]
+      },
+      "answer_hint": "Compare Cloud revenue across 10-Q MD&As."
+    },
+    {
+      "id": "c02",
+      "type": "cross_quarter",
+      "question": "How has NVIDIA's Data Center revenue trended over the last few quarters?",
+      "gold": {
+        "ticker": "NVDA",
+        "filing_type": "10-Q",
+        "sections": [
+          "Item 2"
+        ]
+      },
+      "answer_hint": "Compare Data Center across 10-Q MD&As."
+    },
+    {
+      "id": "c03",
+      "type": "cross_quarter",
+      "question": "How did Apple's Services revenue trend over its recent quarters?",
+      "gold": {
+        "ticker": "AAPL",
+        "filing_type": "10-Q",
+        "sections": [
+          "Item 2"
+        ]
+      },
+      "answer_hint": "Compare Services across 10-Q MD&As."
+    },
+    {
+      "id": "c04",
+      "type": "cross_quarter",
+      "question": "How has Microsoft's Microsoft Cloud revenue grown across recent quarters?",
+      "gold": {
+        "ticker": "MSFT",
+        "filing_type": "10-Q",
+        "sections": [
+          "Item 2"
+        ]
+      },
+      "answer_hint": "Compare Microsoft Cloud across 10-Q MD&As."
+    },
+    {
+      "id": "c05",
+      "type": "cross_quarter",
+      "question": "How have Amazon's net sales grown quarter over quarter recently?",
+      "gold": {
+        "ticker": "AMZN",
+        "filing_type": "10-Q",
+        "sections": [
+          "Item 2"
+        ]
+      },
+      "answer_hint": "Compare net sales across 10-Q MD&As."
+    },
+    {
+      "id": "c06",
+      "type": "cross_quarter",
+      "question": "How has NVIDIA's gross margin changed across the recent quarters?",
+      "gold": {
+        "ticker": "NVDA",
+        "filing_type": "10-Q",
+        "sections": [
+          "Item 2"
+        ]
+      },
+      "answer_hint": "Compare gross margin across 10-Q MD&As."
+    },
+    {
+      "id": "n01",
+      "type": "negative",
+      "question": "What quarterly dividend per share does Amazon pay to its shareholders?",
+      "gold": null,
+      "unanswerable_reason": "Amazon does not pay a dividend; the filings state no such figure."
+    },
+    {
+      "id": "n02",
+      "type": "negative",
+      "question": "What is Alphabet's official revenue guidance for next fiscal year?",
+      "gold": null,
+      "unanswerable_reason": "Companies do not provide forward revenue guidance in 10-K/10-Q filings."
+    },
+    {
+      "id": "n03",
+      "type": "negative",
+      "question": "What was Apple CEO Tim Cook's total compensation for the year?",
+      "gold": null,
+      "unanswerable_reason": "Executive compensation (Item 11) is incorporated by reference to the proxy, not contained in the 10-K."
+    },
+    {
+      "id": "n04",
+      "type": "negative",
+      "question": "How many daily active users does NVIDIA's consumer mobile app have?",
+      "gold": null,
+      "unanswerable_reason": "NVIDIA does not have or disclose such a metric."
+    },
+    {
+      "id": "n05",
+      "type": "negative",
+      "question": "What were Meta Platforms' advertising revenues last quarter?",
+      "gold": null,
+      "unanswerable_reason": "Meta is not in the corpus; no filing covers it."
+    }
+  ]
+}

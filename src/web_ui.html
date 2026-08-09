@@ -1,0 +1,339 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Finance agent</title>
+<style>
+  :root {
+    --bg: #fbfbfa; --panel: #fff; --ink: #1a1a19; --muted: #6b6b66;
+    --line: #e6e5e1; --accent: #2f6f4e; --accent-soft: #eaf3ee;
+    --market: #7a4b1e; --market-soft: #f6eee5; --warn: #8a3324;
+    --mono: ui-monospace, SFMono-Regular, Menlo, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #161715; --panel: #1e201d; --ink: #eceae5; --muted: #9a9890;
+      --line: #2e312c; --accent: #7fbf9a; --accent-soft: #21302a;
+      --market: #d8a26a; --market-soft: #302619; --warn: #e08a76;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font: 15px/1.6 ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  }
+  .wrap { max-width: 760px; margin: 0 auto; padding: 32px 20px 80px; }
+  header { margin-bottom: 24px; }
+  h1 { font-size: 20px; margin: 0 0 4px; letter-spacing: -0.01em; }
+  .sub { color: var(--muted); font-size: 13px; }
+  .sub code { font-family: var(--mono); font-size: 12px; }
+
+  form { display: flex; gap: 8px; margin-bottom: 8px; }
+  input[type=text] {
+    flex: 1; padding: 11px 14px; border: 1px solid var(--line); border-radius: 8px;
+    background: var(--panel); color: var(--ink); font-size: 15px; font-family: inherit;
+  }
+  input[type=text]:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
+  button {
+    padding: 11px 18px; border: 0; border-radius: 8px; background: var(--accent);
+    color: #fff; font-size: 15px; font-weight: 500; cursor: pointer; font-family: inherit;
+  }
+  button:disabled { opacity: .5; cursor: default; }
+  @media (prefers-color-scheme: dark) { button { color: #10201a; } }
+
+  .examples { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 28px; }
+  .examples button {
+    background: transparent; color: var(--muted); border: 1px solid var(--line);
+    border-radius: 999px; padding: 5px 11px; font-size: 12.5px; font-weight: 400;
+  }
+  .examples button:hover { color: var(--ink); border-color: var(--muted); }
+
+  .card {
+    background: var(--panel); border: 1px solid var(--line); border-radius: 10px;
+    padding: 18px 20px; margin-bottom: 14px;
+  }
+  .lbl {
+    font-size: 11px; text-transform: uppercase; letter-spacing: .07em;
+    color: var(--muted); margin-bottom: 10px; font-weight: 600;
+  }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+  .chip {
+    font-size: 12px; padding: 3px 10px; border-radius: 999px;
+    background: var(--accent-soft); color: var(--accent); font-weight: 500;
+  }
+  .chip.market { background: var(--market-soft); color: var(--market); }
+  .chip.none { background: var(--line); color: var(--muted); }
+  .reason { color: var(--muted); font-size: 13px; margin-top: 10px; }
+
+  #steps { list-style: none; margin: 0; padding: 0; font-size: 13.5px; }
+  #steps li { display: flex; gap: 10px; padding: 3px 0; color: var(--muted); }
+  #steps .t { font-family: var(--mono); font-size: 12px; min-width: 52px; text-align: right; }
+  #steps .live { color: var(--ink); }
+  #steps .live .n::after {
+    content: ""; display: inline-block; width: 6px; height: 6px; margin-left: 7px;
+    border-radius: 50%; background: var(--accent); animation: pulse 1s infinite;
+  }
+  @keyframes pulse { 50% { opacity: .25; } }
+
+  .answer { font-size: 15.5px; white-space: pre-wrap; }
+  .answer .cite {
+    font-size: 11.5px; vertical-align: super; color: var(--accent);
+    font-family: var(--mono); font-weight: 600;
+  }
+  ol.sources { margin: 0; padding-left: 22px; font-size: 13.5px; }
+  ol.sources li { margin-bottom: 7px; }
+  ol.sources a { color: inherit; text-decoration: none; border-bottom: 1px solid var(--line); }
+  ol.sources a:hover { border-color: var(--muted); }
+  .kind {
+    font-size: 10.5px; text-transform: uppercase; letter-spacing: .05em;
+    padding: 1px 6px; border-radius: 4px; margin-right: 7px;
+    background: var(--accent-soft); color: var(--accent);
+  }
+  .kind.market { background: var(--market-soft); color: var(--market); }
+
+  details { margin-top: 12px; }
+  summary { cursor: pointer; color: var(--muted); font-size: 13px; }
+  details .body {
+    margin-top: 10px; font-size: 13.5px; color: var(--muted);
+    border-left: 2px solid var(--line); padding-left: 12px;
+  }
+  details .body h4 { margin: 12px 0 4px; font-size: 12.5px; color: var(--ink); }
+  details .body h4:first-child { margin-top: 0; }
+
+  .meta {
+    display: flex; flex-wrap: wrap; gap: 14px; font-size: 12px;
+    color: var(--muted); font-family: var(--mono);
+  }
+  .err { color: var(--warn); }
+  .hidden { display: none; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Finance agent</h1>
+    <div class="sub" id="sub">A router picks the specialists, they run in parallel, and their summaries are reconciled into one cited answer.</div>
+  </header>
+
+  <form id="form">
+    <input type="text" id="q" placeholder="Is NVDA expensive right now?" autocomplete="off" autofocus>
+    <button id="go" type="submit">Ask</button>
+  </form>
+  <div class="examples" id="examples"></div>
+
+  <div class="card hidden" id="routecard">
+    <div class="lbl">Routing</div>
+    <div class="chips" id="chips"></div>
+    <div class="reason" id="reason"></div>
+  </div>
+
+  <div class="card hidden" id="stepcard">
+    <div class="lbl">Progress</div>
+    <ul id="steps"></ul>
+  </div>
+
+  <div class="card hidden" id="answercard">
+    <div class="lbl">Answer</div>
+    <div class="answer" id="answer"></div>
+    <div id="sourcewrap" class="hidden">
+      <div class="lbl" style="margin-top:20px">Sources</div>
+      <ol class="sources" id="sources"></ol>
+    </div>
+    <details id="subwrap" class="hidden">
+      <summary>What each specialist reported</summary>
+      <div class="body" id="subs"></div>
+    </details>
+  </div>
+
+  <div class="card hidden" id="metacard">
+    <div class="meta" id="meta"></div>
+  </div>
+
+  <div class="card hidden" id="errcard">
+    <div class="lbl">Error</div>
+    <div class="err" id="err"></div>
+  </div>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+const EXAMPLES = [
+  "Is NVDA expensive right now?",
+  "What supply chain risks does Apple name?",
+  "How far is AAPL below its 52-week high?",
+  "Is NVDA's P/E reasonable given its margins and growth?",
+  "Should I buy NVDA?",
+];
+
+// Human labels for the trace span names the backend emits.
+const STEP_LABEL = {
+  route: "Choosing specialists",
+  subagent: a => `Asking ${a}`,
+  synthesize: "Reconciling the findings",
+  budget_exceeded: "Summary over budget — truncated",
+};
+
+let busy = false;
+
+function init() {
+  EXAMPLES.forEach(e => {
+    const b = document.createElement("button");
+    b.type = "button"; b.textContent = e;
+    b.onclick = () => { $("q").value = e; ask(); };
+    $("examples").appendChild(b);
+  });
+  fetch("/api/meta").then(r => r.json()).then(m => {
+    $("sub").innerHTML = `A router picks the specialists, they run in parallel, and their
+      summaries are reconciled into one cited answer.<br>
+      Covers ${m.tickers.join(", ")} &middot; model <code>${m.model}</code>
+      &middot; 4 LLM calls per two-specialist question${m.cache_enabled ? ", repeats cached" : ""}.`;
+  }).catch(() => {});
+}
+
+function reset() {
+  ["routecard","stepcard","answercard","metacard","errcard","sourcewrap","subwrap"]
+    .forEach(i => $(i).classList.add("hidden"));
+  $("steps").innerHTML = ""; $("chips").innerHTML = ""; $("reason").textContent = "";
+  $("answer").textContent = ""; $("sources").innerHTML = ""; $("subs").innerHTML = "";
+}
+
+function step(name, detail, ms) {
+  // Close out the previous live step, then append this one.
+  const prev = $("steps").querySelector(".live");
+  if (prev) prev.classList.remove("live");
+  const li = document.createElement("li");
+  li.className = "live";
+  li.innerHTML = `<span class="t">${ms == null ? "" : (ms/1000).toFixed(1)+"s"}</span>
+                  <span class="n">${detail || name}</span>`;
+  $("steps").appendChild(li);
+  return li;
+}
+
+// Render [1], [2] markers as superscripts without trusting model output as HTML.
+function renderAnswer(text) {
+  const el = $("answer");
+  el.textContent = "";
+  const re = /\[(\d+(?:\s*,\s*\d+)*)\]/g;
+  let last = 0, m;
+  while ((m = re.exec(text)) !== null) {
+    el.appendChild(document.createTextNode(text.slice(last, m.index)));
+    const s = document.createElement("span");
+    s.className = "cite"; s.textContent = m[0];
+    el.appendChild(s);
+    last = m.index + m[0].length;
+  }
+  el.appendChild(document.createTextNode(text.slice(last)));
+}
+
+function ask(ev) {
+  if (ev) ev.preventDefault();
+  if (busy) return;
+  const q = $("q").value.trim();
+  if (!q) return;
+  reset();
+  busy = true; $("go").disabled = true; $("go").textContent = "Working…";
+  $("stepcard").classList.remove("hidden");
+  step("start", "Starting", 0);
+
+  const es = new EventSource(`/api/ask?q=${encodeURIComponent(q)}`);
+  const t0 = Date.now();
+
+  es.onmessage = e => {
+    const d = JSON.parse(e.data);
+
+    if (d.type === "span") {
+      if (d.name === "route") {
+        const chips = $("chips");
+        const routed = (d.agents && d.agents !== "none") ? d.agents.split(",") : [];
+        if (!routed.length) {
+          chips.innerHTML = `<span class="chip none">no specialist</span>`;
+        } else {
+          routed.forEach(a => {
+            const c = document.createElement("span");
+            c.className = "chip" + (a === "technicals" ? " market" : "");
+            c.textContent = a;
+            chips.appendChild(c);
+          });
+        }
+        if (d.ticker) {
+          const t = document.createElement("span");
+          t.className = "chip none"; t.textContent = d.ticker;
+          chips.appendChild(t);
+        }
+        $("reason").textContent = d.reason || "";
+        $("routecard").classList.remove("hidden");
+      }
+      const label = d.name === "subagent" ? STEP_LABEL.subagent(d.agent)
+                                          : (STEP_LABEL[d.name] || d.name);
+      step(d.name, label, d.at_ms);
+      return;
+    }
+
+    if (d.type === "error") { fail(d.error); es.close(); return; }
+
+    // done
+    const live = $("steps").querySelector(".live");
+    if (live) live.classList.remove("live");
+    step("finished", "Done", d.duration_ms);
+
+    renderAnswer(d.answer || "(no answer)");
+    $("answercard").classList.remove("hidden");
+
+    if (d.citations && d.citations.length) {
+      d.citations.forEach(c => {
+        const li = document.createElement("li");
+        const k = document.createElement("span");
+        k.className = "kind" + (c.kind === "market" ? " market" : "");
+        k.textContent = c.kind;
+        li.appendChild(k);
+        const a = document.createElement("a");
+        a.href = c.url; a.target = "_blank"; a.rel = "noopener";
+        a.textContent = c.label;
+        li.appendChild(a);
+        $("sources").appendChild(li);
+      });
+      $("sourcewrap").classList.remove("hidden");
+    }
+
+    if (d.sub_answers && d.sub_answers.length) {
+      d.sub_answers.forEach(s => {
+        const h = document.createElement("h4");
+        h.textContent = `${s.agent} — ${s.chars} chars, confidence ${s.confidence}`
+                        + (s.insufficient ? ", insufficient evidence" : "");
+        const p = document.createElement("div");
+        p.textContent = s.answer;
+        $("subs").appendChild(h); $("subs").appendChild(p);
+      });
+      $("subwrap").classList.remove("hidden");
+    }
+
+    $("meta").innerHTML = "";
+    [`confidence ${d.confidence}`,
+     `orchestrator context ${d.context_chars} chars`,
+     `${((d.duration_ms || (Date.now()-t0))/1000).toFixed(1)}s`,
+     `trace ${d.trace_id}`].forEach(t => {
+      const s = document.createElement("span"); s.textContent = t; $("meta").appendChild(s);
+    });
+    $("metacard").classList.remove("hidden");
+
+    es.close(); done();
+  };
+
+  es.onerror = () => { if (busy) fail("Connection to the server was lost."); es.close(); };
+
+  function fail(msg) {
+    $("err").textContent = msg;
+    $("errcard").classList.remove("hidden");
+    const live = $("steps").querySelector(".live");
+    if (live) live.classList.remove("live");
+    done();
+  }
+  function done() { busy = false; $("go").disabled = false; $("go").textContent = "Ask"; }
+}
+
+$("form").addEventListener("submit", ask);
+init();
+</script>
+</body>
+</html>

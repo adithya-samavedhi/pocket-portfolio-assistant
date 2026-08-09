@@ -1,0 +1,14 @@
+# Milestone 1 — filings RAG skeleton
+requests>=2.31          # EDGAR fetch
+beautifulsoup4>=4.12    # HTML stripping
+lxml>=4.9               # fast parser backend for bs4
+sentence-transformers>=2.6  # local embeddings (no API, no key)
+chromadb>=0.5           # local on-disk vector store
+rank-bm25>=0.2          # BM25 keyword retrieval for hybrid search (Milestone 4)
+litellm                 # provider-agnostic LLM layer (Milestone 6) — swap models via env
+python-dotenv>=1.0      # load API keys / settings from a local .env file
+mcp                     # MCP server (src/mcp_server.py) — requires Python >=3.10
+yfinance                # market data (Phase 2) — keyless; Finnhub used instead if key set
+starlette               # local web UI (src/web.py) — was only transitive via litellm
+uvicorn                 # ASGI server for the web UI
+pytest                  # test suite (tests/) — run: python -m pytest tests/ -q

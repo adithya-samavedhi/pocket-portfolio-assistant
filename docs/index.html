@@ -142,6 +142,35 @@
     font-family: var(--mono); font-size: .75rem; color: var(--muted);
   }
 
+  .legend { font-family: var(--mono); font-size: .74rem; color: var(--muted); margin: 1.6rem 0 0; }
+  .legend span { display: inline-block; vertical-align: middle; margin-right: .35rem; }
+  .k-now { width: 16px; height: 8px; border-radius: 99px; background: var(--filings); }
+  .k-was { width: 0; height: 10px; border-right: 2px dashed var(--muted); }
+
+  /* ---- coverage bars ---- */
+  .bars { display: grid; gap: 1.6rem; margin-top: 1.8rem; }
+  .bar-head {
+    display: flex; justify-content: space-between; align-items: baseline;
+    gap: 1rem; margin-bottom: .5rem; flex-wrap: wrap;
+  }
+  .bar-name { font-weight: 600; font-size: .98rem; }
+  .bar-num {
+    font-family: var(--mono); font-size: .82rem; color: var(--muted);
+    font-variant-numeric: tabular-nums; white-space: nowrap;
+  }
+  .bar-num b { color: var(--filings); font-weight: 600; }
+  .bar-num .arw { padding: 0 .2rem; opacity: .6; }
+  /* Solid fill is where it stands now; the dashed tick marks where it started,
+     so growth reads left-to-right rather than the fill looking like a shortfall. */
+  .track {
+    position: relative; height: 8px; border-radius: 99px;
+    background: var(--rule-soft); overflow: hidden;
+  }
+  .track i, .track u { position: absolute; inset: 0 auto 0 0; border-radius: 99px; }
+  .track u { background: var(--filings); z-index: 0; }
+  .track i { background: transparent; border-right: 2px dashed var(--paper); z-index: 2; }
+  .bar-why { color: var(--muted); font-size: .9rem; margin: .5rem 0 0; max-width: 62ch; }
+
   /* ---- worked example ---- */
   .example { border: 1px solid var(--rule); border-radius: 5px; background: var(--panel); overflow: hidden; }
   .example .q {
@@ -319,6 +348,63 @@
         <p class="src">Every number computed from the full price series before it reaches the model — the model interprets, it never does the arithmetic</p>
       </div>
     </div>
+  </section>
+
+  <section>
+    <div class="col">
+      <h2>How it finds the evidence</h2>
+      <p class="lede">
+        Searching a filing by similarity alone quietly misses things. A question
+        about "segments" doesn't look like a table of figures; a question about two
+        companies can return passages from one. So instead of only ranking results,
+        it <em>reserves room</em> for whatever the question actually spans.
+      </p>
+    </div>
+
+    <p class="legend"><span class="k-now"></span> where it stands now &nbsp;·&nbsp; <span class="k-was"></span> where it started</p>
+    <div class="bars">
+      <div class="bar">
+        <div class="bar-head">
+          <span class="bar-name">Every quarter is represented</span>
+          <span class="bar-num">89% <span class="arw">→</span> <b>100%</b></span>
+        </div>
+        <div class="track"><i style="width:89%"></i><u style="width:100%"></u></div>
+        <p class="bar-why">A trend answer built on one quarter isn't a trend. Each period gets its own share of the search.</p>
+      </div>
+
+      <div class="bar">
+        <div class="bar-head">
+          <span class="bar-name">Figures actually reach the model</span>
+          <span class="bar-num">1 of 11 <span class="arw">→</span> <b>24 of 24</b></span>
+        </div>
+        <div class="track"><i style="width:9%"></i><u style="width:100%"></u></div>
+        <p class="bar-why">Financial tables lost every slot to prose, so numeric questions were answered from commentary. Now tables get reserved slots.</p>
+      </div>
+
+      <div class="bar">
+        <div class="bar-head">
+          <span class="bar-name">Both companies appear in a comparison</span>
+          <span class="bar-num">75% <span class="arw">→</span> <b>100%</b></span>
+        </div>
+        <div class="track"><i style="width:75%"></i><u style="width:100%"></u></div>
+        <p class="bar-why">Asked to compare two companies, it was shown one — and compared it with itself.</p>
+      </div>
+
+      <div class="bar">
+        <div class="bar-head">
+          <span class="bar-name">Whole sections for analytical questions</span>
+          <span class="bar-num"><b>8.3&times;</b> more text</span>
+        </div>
+        <div class="track"><i style="width:12%"></i><u style="width:100%"></u></div>
+        <p class="bar-why">A moat or risk argument runs the length of a section. Six fragments are about 1% of a 10-K, so it reads the whole thing.</p>
+      </div>
+    </div>
+
+    <p class="aside" style="margin-top:1.4rem; max-width:64ch;">
+      None of this replaces the normal search results — it only adds to them.
+      Substituting was tried, and twice it threw away evidence the search had
+      already found.
+    </p>
   </section>
 
   <section>

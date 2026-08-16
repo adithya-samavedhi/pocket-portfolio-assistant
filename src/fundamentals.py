@@ -70,10 +70,15 @@ class FundamentalsAgent:
 
     def answer(self, question: str, ticker: str = None, section: str = None,
                period: str = None, filing_type: str = None,
-               k: int = 6, temporal: bool = False) -> AgentAnswer:
+               k: int = 6, temporal: bool = False,
+               expand_section: bool = False) -> AgentAnswer:
+        # Analytical questions get the whole section rather than fragments of
+        # it: k=6 is ~1.2% of a 10-K, and a moat or risk argument is spread
+        # across the entire item.
         sources = search_filings(question, ticker=ticker, section=section,
                                  period=period, filing_type=filing_type,
-                                 k=k, temporal=temporal)
+                                 k=k, temporal=temporal,
+                                 expand_section=expand_section)
         if not sources:
             return AgentAnswer(agent=self.name, insufficient_evidence=True,
                                answer="No filing passages matched the query/filters.")

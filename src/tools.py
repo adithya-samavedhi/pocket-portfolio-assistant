@@ -75,12 +75,19 @@ def _where(ticker, period, filing_type, period_type=None):
 # so without a quota the model is asked numeric questions and shown only commentary.
 DEFAULT_TABLE_QUOTA = 2
 
+# How much text a whole-section expansion may return. k=6 shows ~1.2% of a 10-K;
+# an entire Item 7 is ~39k chars and Item 1A ~134k. 40k (~10k tokens) buys roughly
+# 8x more evidence for analytical questions while staying affordable per call.
+SECTION_BUDGET_CHARS = 40_000
+
 
 def search_filings(query: str, ticker: str = None, section: str = None,
                    period: str = None, filing_type: str = None,
                    k: int = 6, temporal: bool = False,
                    period_type: str = None,
-                   table_quota: int = DEFAULT_TABLE_QUOTA) -> List[Dict]:
+                   table_quota: int = DEFAULT_TABLE_QUOTA,
+                   expand_section: bool = False,
+                   section_budget: int = SECTION_BUDGET_CHARS) -> List[Dict]:
     """Retrieve filing passages.
 
     query       natural-language question or keywords
@@ -129,4 +136,10 @@ def search_filings(query: str, ticker: str = None, section: str = None,
     if section:
         needle = section.lower()
         hits = [h for h in hits if needle in h["metadata"].get("section", "").lower()]
-    return [_format(h) for h in hits[:k]]
+    hits = hits[:k]
+
+    # Analytical questions are answered by a whole section, not by fragments of
+    # one: retrieval picks the section, then we hand over all of it in order.
+    if expand_section and hits:
+        hits = r.expand_sections(hits, budget_chars=section_budget)
+    return [_format(h) for h in hits]

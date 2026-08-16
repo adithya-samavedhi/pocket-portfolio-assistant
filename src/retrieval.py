@@ -170,6 +170,63 @@ class Retriever:
             hits.append({"id": _id, "document": doc, "metadata": meta})
         return hits
 
+    def section_chunks(self, ticker: str, fiscal_period: str, section: str,
+                       filing_type: Optional[str] = None) -> List[Dict]:
+        """Every chunk of one section of one filing, in document order.
+
+        Retrieval returns fragments; an analytical question ("what is the moat",
+        "what are the headwinds") is answered by a whole section, because the
+        argument is distributed across it. k=6 shows ~1.2% of a 10-K.
+        """
+        out = []
+        for i, m in enumerate(self.metas):
+            if (m.get("ticker") == ticker and m.get("fiscal_period") == fiscal_period
+                    and m.get("section") == section
+                    and (not filing_type or m.get("filing_type") == filing_type)):
+                out.append({"id": self.ids[i], "document": self.docs[i], "metadata": m})
+        # chunk_index restores the order the filing was written in, which reads
+        # far better than similarity order for a continuous argument.
+        return sorted(out, key=lambda h: h["metadata"].get("chunk_index", 0))
+
+    def expand_sections(self, hits: List[Dict], budget_chars: int,
+                        max_sections: int = 2) -> List[Dict]:
+        """Grow the retrieved hits into the full sections they came from.
+
+        Sections are taken in the order retrieval ranked them, so the best
+        section is filled in first, and the whole thing is capped: Item 1A alone
+        can run to 130k characters, which is more than a cheap model should be
+        asked to read.
+        """
+        seen, groups = set(), []
+        for h in hits:
+            m = h["metadata"]
+            key = (m.get("ticker"), m.get("fiscal_period"), m.get("section"),
+                   m.get("filing_type"))
+            if key not in seen:
+                seen.add(key)
+                groups.append(key)
+            if len(groups) >= max_sections:
+                break
+
+        # Start from what retrieval already found, so expansion can only ever
+        # ADD context. Filling only the top sections silently dropped passages
+        # the chunk search had got right (measured: two questions went to zero).
+        out = list(hits)
+        have = {h["id"] for h in out}
+        used = sum(len(h["document"]) for h in out)
+
+        for ticker, period, section, ftype in groups:
+            for h in self.section_chunks(ticker, period, section, ftype):
+                if h["id"] in have:
+                    continue
+                n = len(h["document"])
+                if used + n > budget_chars:
+                    return out
+                out.append(h)
+                have.add(h["id"])
+                used += n
+        return out
+
     # --- Milestone 5: temporal fan-out ---
     def periods_for(self, ticker: str, filing_type: Optional[str] = None,
                     period_type: Optional[str] = "quarter"):

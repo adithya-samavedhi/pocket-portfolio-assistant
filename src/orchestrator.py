@@ -51,6 +51,11 @@ Return a single JSON object with exactly these keys:
             macro, personal advice, or a company outside coverage).
   "ticker": the covered ticker the question is about, or null. Covered: {tickers}.
   "temporal": true only if the question asks how something CHANGED over quarters.
+  "analytical": true if answering well needs a WHOLE section of a filing read and
+            weighed — competitive position or moat, what the company says it
+            competes on, the risks or headwinds it discloses, what it says will
+            drive growth, its strategy. False for a lookup of a specific figure,
+            date or fact, which a few passages answer better.
   "subquestions": an object mapping each chosen specialist to the question IT
             should be asked. Rewrite the user's question into what that source
             can actually answer — a filings agent cannot answer "is it
@@ -129,10 +134,13 @@ class Orchestrator:
             # Fall back to the raw question if the router omitted a sub-question.
             subq = data.get("subquestions") or {}
             subquestions = {a: str(subq.get(a) or question) for a in agents}
-            t.add(agents=",".join(agents) or "none",
-                  ticker=data.get("ticker"), reason=data.get("reason", "")[:80])
+            t.add(agents=",".join(agents) or "none", ticker=data.get("ticker"),
+                  analytical=bool(data.get("analytical")),
+                  reason=data.get("reason", "")[:80])
         return {"agents": agents, "ticker": data.get("ticker"),
-                "temporal": bool(data.get("temporal")), "reason": data.get("reason", ""),
+                "temporal": bool(data.get("temporal")),
+                "analytical": bool(data.get("analytical")),
+                "reason": data.get("reason", ""),
                 "subquestions": subquestions,
                 "prompt_chars": len(system) + len(question)}
 
@@ -145,7 +153,8 @@ class Orchestrator:
                 if name == "fundamentals":
                     ans = self.agents[name].answer(
                         asked, ticker=route["ticker"], k=k,
-                        temporal=route["temporal"] and bool(route["ticker"]))
+                        temporal=route["temporal"] and bool(route["ticker"]),
+                        expand_section=route.get("analytical", False))
                 else:
                     ans = self.agents[name].answer(asked, ticker=route["ticker"])
             except Exception as e:                       # noqa: BLE001 - one agent down != run down

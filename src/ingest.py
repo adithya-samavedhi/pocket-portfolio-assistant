@@ -110,6 +110,9 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--all", action="store_true", help="ingest all filings, not just the 10-K")
     ap.add_argument("--reset", action="store_true", help="drop the collection first")
+    ap.add_argument("--force", action="store_true",
+                    help="re-embed filings that are already indexed (needed after "
+                         "re-labelling periods or changing chunking)")
     args = ap.parse_args()
 
     manifest = load_manifest()
@@ -120,6 +123,23 @@ def main():
 
     client = chromadb.PersistentClient(path=str(config.CHROMA_DIR))
     collection = get_collection(client, args.reset)
+
+    # Only embed what is not already indexed. Re-embedding the whole corpus to
+    # add one new quarter would take hours at 50 companies; chunk ids are stable
+    # (`<file>::<n>`), so the first chunk's presence is a reliable marker.
+    if not (args.reset or args.force):
+        before = len(targets)
+        targets = [e for e in targets
+                   if not collection.get(ids=[f"{e['file']}::0"])["ids"]]
+        skipped = before - len(targets)
+        if skipped:
+            print(f"Skipping {skipped} filing(s) already indexed "
+                  f"(--force to re-embed).")
+
+    if not targets:
+        print(f"Nothing to do. Collection '{config.COLLECTION}' has "
+              f"{collection.count():,} chunks.")
+        return
 
     print(f"Ingesting {len(targets)} filing(s):")
     total = sum(ingest_file(e, model, collection) for e in targets)

@@ -5,7 +5,7 @@ across an entire item. Expansion fills the section back in — and, critically,
 may only ever ADD: filling just the top-ranked sections silently dropped
 passages chunk retrieval had already got right.
 """
-from retrieval import Retriever
+from conftest import make_retriever
 
 
 def _hit(i, ticker, period, section, text, idx, ftype="10-K"):
@@ -15,11 +15,7 @@ def _hit(i, ticker, period, section, text, idx, ftype="10-K"):
 
 
 def _retriever(hits):
-    r = Retriever.__new__(Retriever)
-    r.ids = [h["id"] for h in hits]
-    r.docs = [h["document"] for h in hits]
-    r.metas = [h["metadata"] for h in hits]
-    return r
+    return make_retriever(hits)
 
 
 CORPUS = [

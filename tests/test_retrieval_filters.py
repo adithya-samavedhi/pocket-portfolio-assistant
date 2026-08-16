@@ -4,7 +4,7 @@ Two behaviours worth pinning: a bare "Q2 2026" must not silently resolve to one
 reading, and a 10-K's fiscal year must not appear alongside the quarters it
 contains (which invites a year-vs-quarter jump to be read as a trend).
 """
-from retrieval import Retriever
+from conftest import make_retriever
 from tools import _period_clause, _where
 
 
@@ -46,12 +46,11 @@ class TestWhereClause:
 
 
 class TestPeriodsFor:
-    """`periods_for` reads only self.metas, so drive it with a fake corpus."""
+    """`periods_for` queries the store, so drive it with a fake collection."""
 
     @staticmethod
     def _retriever():
-        r = Retriever.__new__(Retriever)
-        r.metas = [
+        metas = [
             {"ticker": "NVDA", "fiscal_period": "Q2 FY2026", "period_type": "quarter",
              "period_end": "2025-07-27", "filing_type": "10-Q"},
             {"ticker": "NVDA", "fiscal_period": "Q3 FY2026", "period_type": "quarter",
@@ -61,7 +60,8 @@ class TestPeriodsFor:
             {"ticker": "AAPL", "fiscal_period": "Q1 FY2026", "period_type": "quarter",
              "period_end": "2025-12-27", "filing_type": "10-Q"},
         ]
-        return r
+        return make_retriever(
+            [{"id": f"c{i}", "document": "x", "metadata": m} for i, m in enumerate(metas)])
 
     def test_annual_excluded_by_default(self):
         """A fiscal year contains its own quarters — never fan out across both."""

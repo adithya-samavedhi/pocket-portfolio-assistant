@@ -54,14 +54,51 @@ class Retriever:
         client = chromadb.PersistentClient(path=str(config.CHROMA_DIR))
         self.collection = client.get_collection(config.COLLECTION)
 
-        # Pull the whole corpus once to build the BM25 index (aligned arrays).
-        got = self.collection.get(include=["documents", "metadatas"])
-        self.ids = got["ids"]
-        self.docs = got["documents"]
-        self.metas = got["metadatas"]
-        self._by_id = {i: (d, m) for i, d, m in zip(self.ids, self.docs, self.metas)}
+        # The corpus is NOT loaded here. It used to be, to build a BM25 index —
+        # at ~13KB of Python objects per chunk that is 3.9GB for a 50-company,
+        # 5-year corpus, which fits on no free host. Everything the default
+        # (dense) path needs is answered by targeted Chroma queries instead; the
+        # full load happens only if BM25/hybrid is explicitly asked for, and the
+        # eval says those lose to dense anyway (MRR 0.545/0.731 vs 0.853).
+        self._corpus = None     # lazy: (ids, docs, metas) — BM25 only
         self._bm25 = None       # lazy: only BM25/hybrid need it
         self._reranker = None   # lazy: only rerank needs it
+
+    # --- corpus access ---
+    @property
+    def corpus(self):
+        """The whole corpus in memory. Only BM25 needs this; it is expensive."""
+        if self._corpus is None:
+            got = self.collection.get(include=["documents", "metadatas"])
+            self._corpus = (got["ids"], got["documents"], got["metadatas"])
+        return self._corpus
+
+    @property
+    def ids(self):
+        return self.corpus[0]
+
+    @property
+    def docs(self):
+        return self.corpus[1]
+
+    @property
+    def metas(self):
+        return self.corpus[2]
+
+    def _fetch(self, ids: List[str]) -> Dict[str, tuple]:
+        """Look up documents by id straight from the store, without holding the
+        corpus in memory."""
+        if not ids:
+            return {}
+        got = self.collection.get(ids=ids, include=["documents", "metadatas"])
+        return {i: (d, m) for i, d, m in
+                zip(got["ids"], got["documents"], got["metadatas"])}
+
+    def _where_get(self, where: dict) -> List[Dict]:
+        """All chunks matching a where clause, as hit dicts."""
+        got = self.collection.get(where=where, include=["documents", "metadatas"])
+        return [{"id": i, "document": d, "metadata": m} for i, d, m in
+                zip(got["ids"], got["documents"], got["metadatas"])]
 
     @property
     def bm25(self):
@@ -78,9 +115,10 @@ class Retriever:
     def _rerank(self, query: str, ids: List[str], k: int) -> List[str]:
         # Prepend the section label so the cross-encoder sees which part of the
         # filing a passage is from, then score each (query, passage) pair.
+        got = self._fetch(ids)
         pairs, cand = [], []
         for _id in ids:
-            doc, meta = self._by_id[_id]
+            doc, meta = got[_id]
             pairs.append([query, f"{meta.get('section', '')}\n{doc}"])
             cand.append(_id)
         scores = self.reranker.predict(pairs)
@@ -164,11 +202,10 @@ class Retriever:
         else:
             raise ValueError(f"unknown method: {method}")
 
-        hits = []
-        for _id in ids[:k]:
-            doc, meta = self._by_id[_id]
-            hits.append({"id": _id, "document": doc, "metadata": meta})
-        return hits
+        chosen = ids[:k]
+        got = self._fetch(chosen)
+        return [{"id": i, "document": got[i][0], "metadata": got[i][1]}
+                for i in chosen if i in got]
 
     def section_chunks(self, ticker: str, fiscal_period: str, section: str,
                        filing_type: Optional[str] = None) -> List[Dict]:
@@ -178,12 +215,11 @@ class Retriever:
         "what are the headwinds") is answered by a whole section, because the
         argument is distributed across it. k=6 shows ~1.2% of a 10-K.
         """
-        out = []
-        for i, m in enumerate(self.metas):
-            if (m.get("ticker") == ticker and m.get("fiscal_period") == fiscal_period
-                    and m.get("section") == section
-                    and (not filing_type or m.get("filing_type") == filing_type)):
-                out.append({"id": self.ids[i], "document": self.docs[i], "metadata": m})
+        clauses = [{"ticker": ticker}, {"fiscal_period": fiscal_period},
+                   {"section": section}]
+        if filing_type:
+            clauses.append({"filing_type": filing_type})
+        out = self._where_get({"$and": clauses})
         # chunk_index restores the order the filing was written in, which reads
         # far better than similarity order for a continuous argument.
         return sorted(out, key=lambda h: h["metadata"].get("chunk_index", 0))
@@ -237,9 +273,8 @@ class Retriever:
         read a year-vs-quarter jump as a trend. Pass None to include everything.
         """
         seen = {}
-        for m in self.metas:
-            if m.get("ticker") != ticker:
-                continue
+        got = self.collection.get(where={"ticker": ticker}, include=["metadatas"])
+        for m in got["metadatas"]:
             if filing_type and m.get("filing_type") != filing_type:
                 continue
             if period_type and m.get("period_type", "quarter") != period_type:
@@ -272,10 +307,12 @@ class Retriever:
             if n_tab:
                 hits = self.search(query, k=n_tab, where=self._with(where, {"chunk_kind": "table"}))
             seen = {h["id"] for h in hits}
-            for _id in self._dense_ids(query, pool + n_tab, where):
-                if _id in seen:
+            cand = [i for i in self._dense_ids(query, pool + n_tab, where) if i not in seen]
+            fetched = self._fetch(cand)
+            for _id in cand:
+                if _id not in fetched:
                     continue
-                doc, meta = self._by_id[_id]
+                doc, meta = fetched[_id]
                 if needle and needle not in meta.get("section", "").lower():
                     continue
                 hits.insert(len(hits) - n_tab if n_tab else len(hits),
